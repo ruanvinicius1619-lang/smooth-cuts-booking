@@ -1,7 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Menu, X, Scissors } from "lucide-react";
+import { Calendar, Menu, X, Scissors, User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 interface HeaderProps {
   onBookingClick?: () => void;
 }
@@ -9,7 +18,22 @@ const Header = ({
   onBookingClick
 }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
   const navItems = [{
     label: "Início",
     href: "/"
@@ -29,6 +53,15 @@ const Header = ({
     } else {
       navigate("/booking");
     }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  const getUserInitials = (email: string) => {
+    return email.charAt(0).toUpperCase();
   };
   return <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 py-4">
@@ -53,13 +86,46 @@ const Header = ({
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" onClick={() => navigate("/auth")}>
-              Entrar
-            </Button>
-            <Button variant="premium" onClick={handleBookingClick}>
-              <Calendar className="w-4 h-4 mr-2" />
-              Agendar Agora
-            </Button>
+            {user ? (
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center space-x-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="text-xs">
+                          {getUserInitials(user.email || "U")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>Meu Perfil</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      <User className="w-4 h-4 mr-2" />
+                      Perfil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sair
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button variant="premium" onClick={handleBookingClick}>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Agendar Agora
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => navigate("/auth")}>
+                  Entrar
+                </Button>
+                <Button variant="premium" onClick={handleBookingClick}>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Agendar Agora
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -78,13 +144,46 @@ const Header = ({
                   {item.label}
                 </button>)}
               <div className="flex flex-col space-y-3 pt-4">
-                <Button variant="outline" onClick={() => navigate("/auth")}>
-                  Entrar
-                </Button>
-                <Button variant="premium" onClick={handleBookingClick}>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Agendar Agora
-                </Button>
+                {user ? (
+                  <>
+                    <div className="flex items-center space-x-2 p-2 bg-muted rounded-lg">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="text-sm">
+                          {getUserInitials(user.email || "U")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">Meu Perfil</span>
+                    </div>
+                    <Button variant="outline" onClick={() => {
+                      navigate("/profile");
+                      setIsMenuOpen(false);
+                    }}>
+                      <User className="w-4 h-4 mr-2" />
+                      Perfil
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sair
+                    </Button>
+                    <Button variant="premium" onClick={handleBookingClick}>
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Agendar Agora
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" onClick={() => navigate("/auth")}>
+                      Entrar
+                    </Button>
+                    <Button variant="premium" onClick={handleBookingClick}>
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Agendar Agora
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>}
