@@ -39,7 +39,7 @@ const Header = ({
               <Scissors className="w-6 h-6 text-barbershop-black" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-foreground">Smooth Cuts</span>
+              <span className="font-bold text-xl text-foreground">Mateus Barbershop</span>
               <span className="text-sm text-barbershop-gray font-medium">Mateus Barbershop</span>
             </div>
           </div>
