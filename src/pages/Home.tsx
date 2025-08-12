@@ -119,7 +119,8 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {services.map((service) => (
-              <Card key={service.id} className="overflow-hidden shadow-card hover:shadow-elegant transition-smooth group cursor-pointer">
+              <Card key={service.id} className="overflow-hidden shadow-card hover:shadow-elegant transition-smooth group cursor-pointer"
+                onClick={() => navigate("/booking")}>
                 <div className="relative h-48 overflow-hidden">
                   <img 
                     src={service.image} 
@@ -139,7 +140,14 @@ const Home = () => {
                     <span className="text-2xl font-bold text-accent">{service.price}</span>
                   </div>
                   <p className="text-barbershop-gray mb-4">{service.description}</p>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/services");
+                    }}
+                  >
                     Selecionar Serviço
                   </Button>
                 </CardContent>
