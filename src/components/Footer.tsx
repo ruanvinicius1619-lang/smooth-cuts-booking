@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Twitter } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Instagram, MessageCircle } from "lucide-react";
 const Footer = () => {
   return <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-12">
@@ -11,8 +11,7 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <Instagram className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
-              <Facebook className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
-              <Twitter className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
+              <MessageCircle className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
             </div>
           </div>
 
