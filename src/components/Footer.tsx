@@ -49,7 +49,7 @@ const Footer = () => {
 
           {/* Services */}
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-accent">Corte Tradicional</h4>
+            <h4 className="text-lg font-semibold text-accent">Serviços</h4>
             <ul className="space-y-2">
               <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte Tradicional</li>
               <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Barba & Bigode</li>
