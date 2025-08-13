@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      services: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          price: number
+          duration_minutes: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          price: number
+          duration_minutes: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          price?: number
+          duration_minutes?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      barbers: {
+        Row: {
+          id: string
+          name: string
+          specialty: string | null
+          email: string | null
+          phone: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          specialty?: string | null
+          email?: string | null
+          phone?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          specialty?: string | null
+          email?: string | null
+          phone?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      bookings: {
+        Row: {
+          id: string
+          user_id: string | null
+          service_id: string | null
+          barber_id: string | null
+          booking_date: string
+          booking_time: string
+          status: string
+          notes: string | null
+          total_price: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          service_id?: string | null
+          barber_id?: string | null
+          booking_date: string
+          booking_time: string
+          status?: string
+          notes?: string | null
+          total_price: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          service_id?: string | null
+          barber_id?: string | null
+          booking_date?: string
+          booking_time?: string
+          status?: string
+          notes?: string | null
+          total_price?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
