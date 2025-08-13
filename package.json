@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "setup-db": "node scripts/setup-database.js"
+    "setup-db": "node scripts/setup-database.js",
+    "dev:auto-setup": "echo 'Iniciando com verificação automática do banco...' && npm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
