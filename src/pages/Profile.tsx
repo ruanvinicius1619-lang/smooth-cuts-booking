@@ -44,62 +44,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Mock data for demonstration (replace with real API calls later)
-  const mockUpcomingBookings: Booking[] = [
-    {
-      id: '1',
-      service_name: 'Corte + Barba',
-      barber_name: 'Carlos Silva',
-      booking_date: '2025-01-20',
-      booking_time: '14:30',
-      status: 'scheduled',
-      total_price: 55.00,
-      created_at: '2025-01-13T10:00:00Z'
-    },
-    {
-      id: '2',
-      service_name: 'Corte de Cabelo',
-      barber_name: 'Pedro Costa',
-      booking_date: '2025-01-25',
-      booking_time: '16:00',
-      status: 'scheduled',
-      total_price: 35.00,
-      created_at: '2025-01-13T11:30:00Z'
-    }
-  ];
-
-  const mockBookingHistory: Booking[] = [
-    {
-      id: '3',
-      service_name: 'Barba Completa',
-      barber_name: 'João Santos',
-      booking_date: '2025-01-10',
-      booking_time: '15:00',
-      status: 'completed',
-      total_price: 25.00,
-      created_at: '2025-01-08T09:00:00Z'
-    },
-    {
-      id: '4',
-      service_name: 'Tratamento Premium',
-      barber_name: 'Carlos Silva',
-      booking_date: '2024-12-28',
-      booking_time: '10:00',
-      status: 'completed',
-      total_price: 85.00,
-      created_at: '2024-12-25T14:00:00Z'
-    },
-    {
-      id: '5',
-      service_name: 'Corte de Cabelo',
-      barber_name: 'Pedro Costa',
-      booking_date: '2024-12-15',
-      booking_time: '17:30',
-      status: 'cancelled',
-      total_price: 35.00,
-      created_at: '2024-12-10T16:00:00Z'
-    }
-  ];
+  // Data is now loaded from Supabase database
 
   const getUserInitials = (email: string) => {
     return email.substring(0, 2).toUpperCase();
@@ -125,35 +70,53 @@ const Profile = () => {
   };
 
   const loadBookings = async () => {
+    if (!user?.id) return;
+    
     setBookingsLoading(true);
     try {
-      // For now, using mock data. Replace with real API calls when database is set up
-      setUpcomingBookings(mockUpcomingBookings);
-      setBookingHistory(mockBookingHistory);
+      // Load upcoming bookings (scheduled status and future dates)
+      const { data: upcoming, error: upcomingError } = await supabase
+        .from('bookings')
+        .select(`
+          *,
+          services(name),
+          barbers(name)
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'scheduled')
+        .gte('booking_date', new Date().toISOString().split('T')[0])
+        .order('booking_date', { ascending: true });
       
-      // TODO: Replace with real Supabase queries:
-      // const { data: upcoming } = await supabase
-      //   .from('bookings')
-      //   .select(`
-      //     *,
-      //     services(name),
-      //     barbers(name)
-      //   `)
-      //   .eq('user_id', user?.id)
-      //   .eq('status', 'scheduled')
-      //   .gte('booking_date', new Date().toISOString().split('T')[0])
-      //   .order('booking_date', { ascending: true });
+      if (upcomingError) throw upcomingError;
       
-      // const { data: history } = await supabase
-      //   .from('bookings')
-      //   .select(`
-      //     *,
-      //     services(name),
-      //     barbers(name)
-      //   `)
-      //   .eq('user_id', user?.id)
-      //   .in('status', ['completed', 'cancelled', 'no_show'])
-      //   .order('booking_date', { ascending: false });
+      // Load booking history (completed, cancelled, no_show)
+      const { data: history, error: historyError } = await supabase
+        .from('bookings')
+        .select(`
+          *,
+          services(name),
+          barbers(name)
+        `)
+        .eq('user_id', user.id)
+        .in('status', ['completed', 'cancelled', 'no_show'])
+        .order('booking_date', { ascending: false });
+      
+      if (historyError) throw historyError;
+      
+      // Transform data to match our interface
+      const transformBooking = (booking: any): Booking => ({
+        id: booking.id,
+        service_name: booking.services?.name || 'Serviço não encontrado',
+        barber_name: booking.barbers?.name || 'Barbeiro não encontrado',
+        booking_date: booking.booking_date,
+        booking_time: booking.booking_time,
+        status: booking.status,
+        total_price: parseFloat(booking.total_price),
+        created_at: booking.created_at
+      });
+      
+      setUpcomingBookings(upcoming?.map(transformBooking) || []);
+      setBookingHistory(history?.map(transformBooking) || []);
       
     } catch (error) {
       console.error('Error loading bookings:', error);
@@ -169,27 +132,20 @@ const Profile = () => {
 
   const cancelBooking = async (bookingId: string) => {
     try {
-      // TODO: Replace with real API call
-      // await supabase
-      //   .from('bookings')
-      //   .update({ status: 'cancelled' })
-      //   .eq('id', bookingId);
+      // Update booking status in database
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', bookingId)
+        .eq('user_id', user?.id); // Extra security check
       
-      // For now, update local state
-      setUpcomingBookings(prev => 
-        prev.map(booking => 
-          booking.id === bookingId 
-            ? { ...booking, status: 'cancelled' as BookingStatus }
-            : booking
-        ).filter(booking => booking.status === 'scheduled')
-      );
+      if (error) throw error;
       
-      setBookingHistory(prev => [
-        ...prev,
-        ...upcomingBookings
-          .filter(booking => booking.id === bookingId)
-          .map(booking => ({ ...booking, status: 'cancelled' as BookingStatus }))
-      ]);
+      // Reload bookings to reflect changes
+      await loadBookings();
       
       toast({
         title: "Sucesso",

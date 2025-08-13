@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -18,25 +21,86 @@ import {
 
 const Booking = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedBarber, setSelectedBarber] = useState<string>("");
   const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [services, setServices] = useState<any[]>([]);
+  const [barbers, setBarbers] = useState<any[]>([]);
 
-  const services = [
-    { id: "corte", name: "Corte de Cabelo", price: 35, duration: "45min" },
-    { id: "barba", name: "Barba Completa", price: 25, duration: "30min" },
-    { id: "combo", name: "Corte + Barba", price: 55, duration: "60min" },
-    { id: "sobrancelha", name: "Design de Sobrancelha", price: 15, duration: "20min" },
-    { id: "premium", name: "Tratamento Premium", price: 85, duration: "90min" }
-  ];
-
-  const barbers = [
-    { id: "carlos", name: "Carlos Silva", specialty: "Cortes clássicos" },
-    { id: "joao", name: "João Santos", specialty: "Barba e bigode" },
-    { id: "pedro", name: "Pedro Costa", specialty: "Cortes modernos" }
-  ];
+  // Load services and barbers from database
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Check authentication
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user || null);
+        
+        // Load services
+        const { data: servicesData, error: servicesError } = await supabase
+          .from('services')
+          .select('*')
+          .order('name');
+        
+        if (servicesError) throw servicesError;
+        
+        // Load barbers
+        const { data: barbersData, error: barbersError } = await supabase
+          .from('barbers')
+          .select('*')
+          .order('name');
+        
+        if (barbersError) throw barbersError;
+        
+        // Transform services data
+        const transformedServices = servicesData?.map(service => ({
+          id: service.id,
+          name: service.name,
+          price: parseFloat(service.price),
+          duration: `${service.duration_minutes}min`
+        })) || [];
+        
+        // Transform barbers data
+        const transformedBarbers = barbersData?.map(barber => ({
+          id: barber.id,
+          name: barber.name,
+          specialty: barber.specialty || 'Especialista'
+        })) || [];
+        
+        setServices(transformedServices);
+        setBarbers(transformedBarbers);
+        
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar dados. Usando dados padrão.",
+          variant: "destructive"
+        });
+        
+        // Fallback to default data
+        setServices([
+          { id: "corte", name: "Corte de Cabelo", price: 35, duration: "45min" },
+          { id: "barba", name: "Barba Completa", price: 25, duration: "30min" },
+          { id: "combo", name: "Corte + Barba", price: 55, duration: "60min" },
+          { id: "sobrancelha", name: "Design de Sobrancelha", price: 15, duration: "20min" },
+          { id: "premium", name: "Tratamento Premium", price: 85, duration: "90min" }
+        ]);
+        
+        setBarbers([
+          { id: "carlos", name: "Carlos Silva", specialty: "Cortes clássicos" },
+          { id: "joao", name: "João Santos", specialty: "Barba e bigode" },
+          { id: "pedro", name: "Pedro Costa", specialty: "Cortes modernos" }
+        ]);
+      }
+    };
+    
+    loadData();
+  }, [toast]);
 
   const timeSlots = [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -56,10 +120,76 @@ const Booking = () => {
     }
   };
 
-  const handleConfirmBooking = () => {
-    // Aqui você implementaria a lógica de agendamento
-    alert("Agendamento confirmado! Redirecionando para o login...");
-    navigate("/auth");
+  const handleConfirmBooking = async () => {
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Você precisa fazer login para confirmar o agendamento.",
+        variant: "destructive"
+      });
+      navigate("/auth");
+      return;
+    }
+    
+    if (!selectedService || !selectedBarber || !selectedDate || !selectedTime) {
+      toast({
+        title: "Dados incompletos",
+        description: "Por favor, preencha todos os campos.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const selectedServiceData = services.find(s => s.id === selectedService);
+      
+      if (!selectedServiceData) {
+        throw new Error('Serviço não encontrado');
+      }
+      
+      // Create booking in database
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert({
+          user_id: user.id,
+          service_id: selectedService,
+          barber_id: selectedBarber,
+          booking_date: selectedDate.toISOString().split('T')[0],
+          booking_time: selectedTime,
+          status: 'scheduled',
+          total_price: selectedServiceData.price,
+          notes: null
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          throw new Error('Este horário já está ocupado. Por favor, escolha outro horário.');
+        }
+        throw error;
+      }
+      
+      toast({
+        title: "Agendamento confirmado!",
+        description: "Seu agendamento foi criado com sucesso. Você pode visualizá-lo no seu perfil.",
+      });
+      
+      // Redirect to profile page
+      navigate("/profile");
+      
+    } catch (error: any) {
+      console.error('Error creating booking:', error);
+      toast({
+        title: "Erro no agendamento",
+        description: error.message || "Erro ao criar agendamento. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const canProceed = (step: number) => {
@@ -308,8 +438,9 @@ const Booking = () => {
                       <Button 
                         variant="premium" 
                         onClick={handleConfirmBooking}
+                        disabled={loading}
                       >
-                        Confirmar Agendamento
+                        {loading ? "Confirmando..." : "Confirmar Agendamento"}
                       </Button>
                     ) : (
                       <Button 
