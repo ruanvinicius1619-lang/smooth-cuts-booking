@@ -5,7 +5,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-accent">Mateus Barbershop</h3>
+            <h3 className="text-xl font-bold text-accent">Mateus BarberShop</h3>
             <p className="text-barbershop-gray-light">A barbearia premium que combina tradição e modernidade para oferecer a melhor experiência em cuidados masculinos.</p>
             <div className="flex space-x-4">
               <Instagram className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
