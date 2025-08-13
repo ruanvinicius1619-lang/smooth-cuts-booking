@@ -5,8 +5,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold text-accent">Mateus Barbarshop</h3>
-            <p className="text-barbershop-gray-light">A barbearia premique combina tradição e modernidade para oferecer a melhor experiência em cuidados masculinos.</p>
+            <h3 className="text-xl font-bold text-accent">Mateus BarberShop</h3>
+            <p className="text-barbershop-gray-light">A barbearia premium que combina tradição e modernidade para oferecer a melhor experiência em cuidados masculinos.</p>
             <div className="flex space-x-4">
               <Instagram className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
               <MessageCircle className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
@@ -49,9 +49,9 @@ const Footer = () => {
 
           {/* Services */}
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-accent">Corte Tradicional</h4>
+            <h4 className="text-lg font-semibold text-accent">Serviços</h4>
             <ul className="space-y-2">
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte T</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte Tradicional</li>
               <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Barba & Bigode</li>
               <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Tratamentos Capilares</li>
               <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Relaxamento</li>
@@ -59,11 +59,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-barbershop-charcoal mt-8 pt-8 text-center">
-          <p className="text-barbershop-gray-light">
-            © 2024 Smooth Cuts. Todos os direitos reservados.
-          </p>
-        </div>
+        
       </div>
     </footer>;
 };

@@ -4,12 +4,7 @@ import { Calendar, Menu, X, Scissors, User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 interface HeaderProps {
   onBookingClick?: () => void;
@@ -20,18 +15,24 @@ const Header = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       setUser(session?.user ?? null);
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
   const navItems = [{
@@ -54,12 +55,10 @@ const Header = ({
       navigate("/booking");
     }
   };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
   };
-
   const getUserInitials = (email: string) => {
     return email.charAt(0).toUpperCase();
   };
@@ -72,8 +71,8 @@ const Header = ({
               <Scissors className="w-6 h-6 text-barbershop-black" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-foreground">Mateus Barbershop</span>
-              <span className="text-sm text-barbershop-gray font-medium">Mateus Barbershop</span>
+              <span className="font-bold text-xl text-foreground">Mateus BarberShop</span>
+              <span className="text-sm text-barbershop-gray font-medium">Mateus BarberShop</span>
             </div>
           </div>
 
@@ -86,8 +85,7 @@ const Header = ({
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <>
+            {user ? <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex items-center space-x-2">
@@ -114,9 +112,7 @@ const Header = ({
                   <Calendar className="w-4 h-4 mr-2" />
                   Agendar Agora
                 </Button>
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Button variant="outline" onClick={() => navigate("/auth")}>
                   Entrar
                 </Button>
@@ -124,8 +120,7 @@ const Header = ({
                   <Calendar className="w-4 h-4 mr-2" />
                   Agendar Agora
                 </Button>
-              </>
-            )}
+              </>}
           </div>
 
           {/* Mobile Menu Button */}
@@ -144,8 +139,7 @@ const Header = ({
                   {item.label}
                 </button>)}
               <div className="flex flex-col space-y-3 pt-4">
-                {user ? (
-                  <>
+                {user ? <>
                     <div className="flex items-center space-x-2 p-2 bg-muted rounded-lg">
                       <Avatar className="w-8 h-8">
                         <AvatarFallback className="text-sm">
@@ -155,16 +149,16 @@ const Header = ({
                       <span className="text-sm font-medium">Meu Perfil</span>
                     </div>
                     <Button variant="outline" onClick={() => {
-                      navigate("/profile");
-                      setIsMenuOpen(false);
-                    }}>
+                navigate("/profile");
+                setIsMenuOpen(false);
+              }}>
                       <User className="w-4 h-4 mr-2" />
                       Perfil
                     </Button>
                     <Button variant="outline" onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}>
+                handleLogout();
+                setIsMenuOpen(false);
+              }}>
                       <LogOut className="w-4 h-4 mr-2" />
                       Sair
                     </Button>
@@ -172,9 +166,7 @@ const Header = ({
                       <Calendar className="w-4 h-4 mr-2" />
                       Agendar Agora
                     </Button>
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <Button variant="outline" onClick={() => navigate("/auth")}>
                       Entrar
                     </Button>
@@ -182,8 +174,7 @@ const Header = ({
                       <Calendar className="w-4 h-4 mr-2" />
                       Agendar Agora
                     </Button>
-                  </>
-                )}
+                  </>}
               </div>
             </nav>
           </div>}
