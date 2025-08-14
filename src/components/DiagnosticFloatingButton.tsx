@@ -1,16 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ErrorDiagnostic from '@/components/ErrorDiagnostic';
 import { useErrorDetection } from '@/hooks/useErrorDetection';
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 const DiagnosticFloatingButton = () => {
   const [showDiagnostic, setShowDiagnostic] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { hasUnhandledErrors, errorCount } = useErrorDetection();
   const isProduction = import.meta.env.PROD;
+  
+  // Email autorizado para ver o botão de diagnóstico
+  const AUTHORIZED_EMAIL = 'egrinaldo19@gmail.com';
 
-  // Só mostrar em produção ou quando há erros
-  if (!isProduction && !hasUnhandledErrors) {
+  useEffect(() => {
+    // Obter sessão inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Escutar mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Verificar se o usuário está autorizado
+  const isAuthorizedUser = user?.email === AUTHORIZED_EMAIL;
+
+  // Só mostrar em produção ou quando há erros E o usuário está autorizado
+  if ((!isProduction && !hasUnhandledErrors) || !isAuthorizedUser) {
     return null;
   }
 

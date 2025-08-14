@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DatabaseInitializer from "@/components/DatabaseInitializer";
 import IdleLogoutProvider from "@/components/IdleLogoutProvider";
 import DiagnosticFloatingButton from "@/components/DiagnosticFloatingButton";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
 import Auth from "./pages/Auth";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <DiagnosticFloatingButton />
+            <WhatsAppButton phoneNumber="5571993163034" />
           </IdleLogoutProvider>
         </BrowserRouter>
       </DatabaseInitializer>
