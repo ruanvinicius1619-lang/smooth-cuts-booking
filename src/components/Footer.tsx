@@ -8,10 +8,9 @@ const Footer = () => {
             <h3 className="text-xl font-bold text-accent">Mateus BarberShop</h3>
             <p className="text-barbershop-gray-light">A barbearia premium que combina tradição e modernidade para oferecer a melhor experiência em cuidados masculinos.</p>
             <div className="flex space-x-4">
-              <a href="https://instagram.com/mateusbarbershop99_" target="_blank" rel="noopener noreferrer">
-                
+              <a href="https://instagram.com/mateusbarbershop99_" target="_blank" rel="noopener noreferrer" className="text-accent hover:text-barbershop-gray-light transition-smooth">
+                <Instagram className="w-5 h-5" />
               </a>
-              
             </div>
           </div>
 
