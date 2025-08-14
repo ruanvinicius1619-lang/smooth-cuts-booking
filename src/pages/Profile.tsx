@@ -52,6 +52,7 @@ const Profile = () => {
 
   const getStatusBadge = (status: BookingStatus) => {
     const statusConfig = {
+      pending: { label: 'Pendente', variant: 'default' as const, icon: Clock },
       scheduled: { label: 'Agendado', variant: 'default' as const, icon: Clock },
       completed: { label: 'Concluído', variant: 'secondary' as const, icon: CheckCircle },
       cancelled: { label: 'Cancelado', variant: 'destructive' as const, icon: XCircle },
