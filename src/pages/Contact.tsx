@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Map from "@/components/Map";
@@ -5,9 +9,64 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Send, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
+
+// Schema de validação do formulário
+const contactSchema = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  phone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
+  email: z.string().email("E-mail inválido"),
+  subject: z.string().min(5, "Assunto deve ter pelo menos 5 caracteres"),
+  message: z.string().min(10, "Mensagem deve ter pelo menos 10 caracteres")
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
 
 const Contact = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema)
+  });
+
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true);
+    
+    try {
+      // Simula envio da mensagem (aqui você pode integrar com um serviço real)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      console.log('Dados do formulário:', data);
+      
+      // Mostra toast de sucesso
+      toast.success('Mensagem enviada com sucesso!', {
+        description: 'Entraremos em contato em breve.'
+      });
+      
+      setIsSubmitted(true);
+      reset();
+      
+      // Reset do estado após 3 segundos
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 3000);
+      
+    } catch (error) {
+      toast.error('Erro ao enviar mensagem', {
+        description: 'Tente novamente mais tarde.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const contactInfo = [
     {
       icon: MapPin,
@@ -80,49 +139,125 @@ const Contact = () => {
                 {/* Contact Form */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-2xl text-foreground">
-                      Envie uma Mensagem
+                    <CardTitle className="text-2xl text-foreground flex items-center gap-2">
+                      {isSubmitted ? (
+                        <>
+                          <CheckCircle className="w-6 h-6 text-green-500" />
+                          Mensagem Enviada!
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-6 h-6" />
+                          Envie uma Mensagem
+                        </>
+                      )}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-2 block">
-                          Nome
-                        </label>
-                        <Input placeholder="Seu nome completo" />
+                  <CardContent>
+                    {isSubmitted ? (
+                      <div className="text-center py-8">
+                        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
+                          Obrigado pelo contato!
+                        </h3>
+                        <p className="text-muted-foreground">
+                          Sua mensagem foi enviada com sucesso. Entraremos em contato em breve.
+                        </p>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-2 block">
-                          Telefone
-                        </label>
-                        <Input placeholder="(11) 99999-9999" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        E-mail
-                      </label>
-                      <Input placeholder="seu@email.com" type="email" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Assunto
-                      </label>
-                      <Input placeholder="Como podemos ajudar?" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Mensagem
-                      </label>
-                      <Textarea 
-                        placeholder="Descreva sua dúvida ou sugestão..."
-                        rows={5}
-                      />
-                    </div>
-                    <Button variant="premium" className="w-full">
-                      Enviar Mensagem
-                    </Button>
+                    ) : (
+                      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-foreground mb-2 block">
+                              Nome *
+                            </label>
+                            <Input 
+                              placeholder="Seu nome completo"
+                              {...register("name")}
+                              className={errors.name ? "border-red-500" : ""}
+                            />
+                            {errors.name && (
+                              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-foreground mb-2 block">
+                              Telefone *
+                            </label>
+                            <Input 
+                              placeholder="(11) 99999-9999"
+                              {...register("phone")}
+                              className={errors.phone ? "border-red-500" : ""}
+                            />
+                            {errors.phone && (
+                              <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">
+                            E-mail *
+                          </label>
+                          <Input 
+                            placeholder="seu@email.com" 
+                            type="email"
+                            {...register("email")}
+                            className={errors.email ? "border-red-500" : ""}
+                          />
+                          {errors.email && (
+                            <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">
+                            Assunto *
+                          </label>
+                          <Input 
+                            placeholder="Como podemos ajudar?"
+                            {...register("subject")}
+                            className={errors.subject ? "border-red-500" : ""}
+                          />
+                          {errors.subject && (
+                            <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">
+                            Mensagem *
+                          </label>
+                          <Textarea 
+                            placeholder="Descreva sua dúvida ou sugestão..."
+                            rows={5}
+                            {...register("message")}
+                            className={errors.message ? "border-red-500" : ""}
+                          />
+                          {errors.message && (
+                            <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>
+                          )}
+                        </div>
+                        <Button 
+                          type="submit"
+                          variant="premium" 
+                          className="w-full"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Enviando...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4 mr-2" />
+                              Enviar Mensagem
+                            </>
+                          )}
+                        </Button>
+                        <p className="text-xs text-muted-foreground text-center">
+                          * Campos obrigatórios
+                        </p>
+                      </form>
+                    )}
                   </CardContent>
                 </Card>
 

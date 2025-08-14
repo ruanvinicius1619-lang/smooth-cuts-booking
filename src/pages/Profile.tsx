@@ -105,7 +105,15 @@ const Profile = () => {
       if (historyError) throw historyError;
       
       // Transform data to match our interface
-      const transformBooking = (booking: any): Booking => ({
+      const transformBooking = (booking: { 
+        id: string;
+        services?: { name: string; price: number } | null;
+        barbers?: { name: string } | null;
+        booking_date: string;
+        booking_time: string;
+        status: BookingStatus;
+        created_at: string;
+      }): Booking => ({
         id: booking.id,
         service_name: booking.services?.name || 'Serviço não encontrado',
         barber_name: booking.barbers?.name || 'Barbeiro não encontrado',
