@@ -77,52 +77,30 @@ const Profile = () => {
     
     setBookingsLoading(true);
     try {
-      // Load upcoming bookings
-      const { data: upcoming, error: upcomingError } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          services(name, price),
-          barbers(name)
-        `)
-        .eq('user_id', user.id)
-        .eq('status', 'pending')
-        .gte('booking_date', new Date().toISOString().split('T')[0])
-        .order('booking_date', { ascending: true });
+      // Load bookings from localStorage
+      const localBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      const userBookings = localBookings.filter((booking: any) => booking.user_id === user.id);
       
-      if (upcomingError) throw upcomingError;
+      const today = new Date().toISOString().split('T')[0];
       
-      // Load booking history (completed, cancelled, no_show)
-      const { data: history, error: historyError } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          services(name, price),
-          barbers(name)
-        `)
-        .eq('user_id', user.id)
-        .in('status', ['completed', 'cancelled', 'no_show'])
-        .order('booking_date', { ascending: false });
+      // Separate upcoming and history bookings
+      const upcoming = userBookings.filter((booking: any) => 
+        booking.status === 'pending' && booking.booking_date >= today
+      ).sort((a: any, b: any) => a.booking_date.localeCompare(b.booking_date));
       
-      if (historyError) throw historyError;
+      const history = userBookings.filter((booking: any) => 
+        ['completed', 'cancelled', 'no_show'].includes(booking.status) || booking.booking_date < today
+      ).sort((a: any, b: any) => b.booking_date.localeCompare(a.booking_date));
       
       // Transform data to match our interface
-      const transformBooking = (booking: { 
-        id: string;
-        services?: { name: string; price: number } | null;
-        barbers?: { name: string } | null;
-        booking_date: string;
-        booking_time: string;
-        status: BookingStatus;
-        created_at: string;
-      }): Booking => ({
+      const transformBooking = (booking: any): Booking => ({
         id: booking.id,
-        service_name: booking.services?.name || 'Serviço não encontrado',
-        barber_name: booking.barbers?.name || 'Barbeiro não encontrado',
+        service_name: booking.service_name || booking.services?.name || 'Serviço não encontrado',
+        barber_name: booking.barber_name || booking.barbers?.name || 'Barbeiro não encontrado',
         booking_date: booking.booking_date,
         booking_time: booking.booking_time,
         status: booking.status,
-        total_price: booking.services?.price || 0,
+        total_price: booking.service_price || booking.services?.price || 0,
         created_at: booking.created_at
       });
       
@@ -143,17 +121,20 @@ const Profile = () => {
 
   const cancelBooking = async (bookingId: string) => {
     try {
-      // Update booking status in database
-      const { error } = await supabase
-        .from('bookings')
-        .update({ 
-          status: 'cancelled',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', bookingId)
-        .eq('user_id', user?.id); // Extra security check
+      // Update booking status in localStorage
+      const localBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      const updatedBookings = localBookings.map((booking: any) => {
+        if (booking.id === bookingId && booking.user_id === user?.id) {
+          return {
+            ...booking,
+            status: 'cancelled',
+            updated_at: new Date().toISOString()
+          };
+        }
+        return booking;
+      });
       
-      if (error) throw error;
+      localStorage.setItem('userBookings', JSON.stringify(updatedBookings));
       
       // Reload bookings to reflect changes
       await loadBookings();

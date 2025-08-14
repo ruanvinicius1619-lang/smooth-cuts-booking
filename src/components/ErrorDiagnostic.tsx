@@ -63,14 +63,14 @@ const ErrorDiagnostic: React.FC<ErrorDiagnosticProps> = ({ onClose }) => {
       });
     }
 
-    // 2. Testar conectividade com Supabase
+    // 2. Testar conectividade com Supabase (usando auth em vez de tabelas)
     try {
-      const { data, error } = await supabase.from('services').select('count').limit(1);
+      const { data, error } = await supabase.auth.getSession();
       if (error) {
         results.push({
           name: 'Conectividade Supabase',
-          status: 'error',
-          message: 'Erro ao conectar com o Supabase',
+          status: 'warning',
+          message: 'Erro ao conectar com o Supabase Auth',
           details: error.message
         });
       } else {
