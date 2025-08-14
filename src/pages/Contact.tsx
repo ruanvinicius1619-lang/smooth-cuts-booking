@@ -62,23 +62,31 @@ const Contact = () => {
         // Simula envio para demonstração
         await new Promise(resolve => setTimeout(resolve, 1000));
       } else {
-        // Inicializa EmailJS com a chave pública
-        emailjs.init(publicKey);
-        
-        // Envia e-mail real usando EmailJS
-        const templateParams = {
-          from_name: data.name,
-          from_email: data.email,
-          phone: data.phone,
-          subject: data.subject,
-          message: data.message,
-          to_email: import.meta.env.VITE_CONTACT_EMAIL || 'contato@smoothcuts.com.br'
-        };
-        
-        console.log('Enviando e-mail com parâmetros:', templateParams);
-        
-        const response = await emailjs.send(serviceId, templateId, templateParams);
-        console.log('E-mail enviado com sucesso:', response);
+        try {
+          // Inicializa EmailJS com a chave pública
+          console.log('Inicializando EmailJS...');
+          emailjs.init(publicKey);
+          
+          // Envia e-mail real usando EmailJS
+          const templateParams = {
+            from_name: data.name,
+            from_email: data.email,
+            phone: data.phone,
+            subject: data.subject,
+            message: data.message,
+            to_email: import.meta.env.VITE_CONTACT_EMAIL || 'contato@smoothcuts.com.br'
+          };
+          
+          console.log('Enviando e-mail com parâmetros:', templateParams);
+          console.log('Service ID:', serviceId);
+          console.log('Template ID:', templateId);
+          
+          const response = await emailjs.send(serviceId, templateId, templateParams);
+          console.log('E-mail enviado com sucesso:', response);
+        } catch (emailError) {
+          console.error('Erro específico do EmailJS:', emailError);
+          throw emailError; // Re-throw para ser capturado pelo catch principal
+        }
       }
       
       // Mostra toast de sucesso
@@ -96,8 +104,32 @@ const Contact = () => {
       
     } catch (error) {
       console.error('Erro ao enviar e-mail:', error);
+      
+      // Log detalhado do erro
+      if (error instanceof Error) {
+        console.error('Mensagem do erro:', error.message);
+        console.error('Stack trace:', error.stack);
+      }
+      
+      // Verifica se é um erro específico do EmailJS
+      if (error && typeof error === 'object' && 'text' in error) {
+        console.error('Erro EmailJS:', error.text);
+        console.error('Status:', error.status);
+      }
+      
+      let errorMessage = 'Tente novamente mais tarde.';
+      
+      // Personaliza a mensagem baseada no tipo de erro
+      if (error && typeof error === 'object') {
+        if ('text' in error && error.text) {
+          errorMessage = `Erro EmailJS: ${error.text}`;
+        } else if ('message' in error && error.message) {
+          errorMessage = error.message;
+        }
+      }
+      
       toast.error('Erro ao enviar mensagem', {
-        description: 'Tente novamente mais tarde.'
+        description: errorMessage
       });
     } finally {
       setIsSubmitting(false);
