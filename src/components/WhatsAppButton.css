@@ -1,0 +1,124 @@
+/* Estilos para o botão flutuante do WhatsApp */
+
+/* Botão principal */
+.whatsapp-button {
+  /* Posicionamento fixo no canto inferior direito */
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000; /* Garante que fique acima de outros elementos */
+  
+  /* Aparência do botão */
+  width: 60px;
+  height: 60px;
+  background-color: #25D366; /* Verde oficial do WhatsApp */
+  border: none;
+  border-radius: 50%; /* Torna o botão redondo */
+  cursor: pointer;
+  
+  /* Sombra para dar profundidade */
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  
+  /* Transições suaves */
+  transition: all 0.3s ease;
+  
+  /* Centraliza o ícone */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Animação pulse contínua */
+  animation: whatsapp-pulse 2s infinite;
+}
+
+/* Efeito hover - aumenta ligeiramente e muda a sombra */
+.whatsapp-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.6);
+  background-color: #128C7E; /* Verde mais escuro no hover */
+}
+
+/* Efeito active - diminui ligeiramente quando clicado */
+.whatsapp-button:active {
+  transform: scale(0.95);
+}
+
+/* Ícone do WhatsApp */
+.whatsapp-icon {
+  width: 32px;
+  height: 32px;
+  color: white; /* Ícone branco */
+  transition: transform 0.3s ease;
+}
+
+/* Animação pulse - faz o botão "pulsar" suavemente */
+@keyframes whatsapp-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+  .whatsapp-button {
+    /* Ajusta tamanho e posição para mobile */
+    width: 56px;
+    height: 56px;
+    bottom: 16px;
+    right: 16px;
+  }
+  
+  .whatsapp-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Para telas muito pequenas */
+@media (max-width: 480px) {
+  .whatsapp-button {
+    width: 50px;
+    height: 50px;
+    bottom: 12px;
+    right: 12px;
+  }
+  
+  .whatsapp-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Acessibilidade - remove outline padrão e adiciona um personalizado */
+.whatsapp-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.3);
+}
+
+/* Animação alternativa bounce (comentada - pode ser usada no lugar do pulse) */
+/*
+@keyframes whatsapp-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+}
+
+.whatsapp-button {
+  animation: whatsapp-bounce 2s infinite;
+}
+*/

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste EmailJS</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+    <h1>Teste de Envio EmailJS</h1>
+    <form id="contact-form">
+        <div>
+            <label>Nome:</label>
+            <input type="text" name="from_name" required>
+        </div>
+        <div>
+            <label>E-mail:</label>
+            <input type="email" name="from_email" required>
+        </div>
+        <div>
+            <label>Telefone:</label>
+            <input type="tel" name="phone">
+        </div>
+        <div>
+            <label>Assunto:</label>
+            <input type="text" name="subject" required>
+        </div>
+        <div>
+            <label>Mensagem:</label>
+            <textarea name="message" required></textarea>
+        </div>
+        <button type="submit">Enviar Teste</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        // Configurações do EmailJS
+        const SERVICE_ID = 'gmailMessage';
+        const TEMPLATE_ID = 'template_fj5luot';
+        const PUBLIC_KEY = '2xNo3p1NTSk0-1Goa';
+        const TO_EMAIL = 'egrinaldo19@gmail.com';
+
+        // Inicializa EmailJS
+        emailjs.init(PUBLIC_KEY);
+
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Enviando...';
+            
+            // Coleta dados do formulário
+            const formData = new FormData(this);
+            const templateParams = {
+                from_name: formData.get('from_name'),
+                from_email: formData.get('from_email'),
+                phone: formData.get('phone'),
+                subject: formData.get('subject'),
+                message: formData.get('message'),
+                to_email: TO_EMAIL
+            };
+            
+            console.log('Enviando com parâmetros:', templateParams);
+            console.log('Service ID:', SERVICE_ID);
+            console.log('Template ID:', TEMPLATE_ID);
+            console.log('Public Key:', PUBLIC_KEY);
+            
+            // Envia e-mail
+            emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    resultDiv.innerHTML = '<p style="color: green;">✅ E-mail enviado com sucesso!</p>';
+                    resultDiv.innerHTML += '<p>Status: ' + response.status + '</p>';
+                    resultDiv.innerHTML += '<p>Resposta: ' + response.text + '</p>';
+                })
+                .catch(function(error) {
+                    console.error('FAILED...', error);
+                    resultDiv.innerHTML = '<p style="color: red;">❌ Erro ao enviar e-mail:</p>';
+                    resultDiv.innerHTML += '<pre>' + JSON.stringify(error, null, 2) + '</pre>';
+                });
+        });
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        form div {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+    </style>
+</body>
+</html>

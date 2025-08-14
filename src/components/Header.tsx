@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Menu, X, User, LogOut } from "lucide-react";
+import { Calendar, Menu, X, Scissors, User, LogOut, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { isAdmin } from "@/config/admin";
 interface HeaderProps {
   onBookingClick?: () => void;
 }
@@ -56,8 +57,31 @@ const Header = ({
     }
   };
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+    try {
+      // Primeira tentativa: logout normal
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        // Segunda tentativa: logout apenas local
+        const { error: localError } = await supabase.auth.signOut({ scope: 'local' });
+        
+        if (localError) {
+          // Terceira tentativa: limpeza manual
+          sessionStorage.removeItem('sb-jheywkeofcttgdgquawm-auth-token');
+          sessionStorage.removeItem('supabase.auth.token');
+          
+          // Força atualização do estado
+          window.location.reload();
+          return;
+        }
+      }
+      
+      navigate("/");
+    } catch (error) {
+      // Fallback final: limpeza manual e reload
+      sessionStorage.clear();
+      window.location.href = '/';
+    }
   };
   const getUserInitials = (email: string) => {
     return email.charAt(0).toUpperCase();
@@ -90,6 +114,9 @@ const Header = ({
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex items-center space-x-2">
                       <Avatar className="w-6 h-6">
+                        {user.user_metadata?.avatar_url ? (
+                          <AvatarImage src={user.user_metadata.avatar_url} alt="Foto do perfil" />
+                        ) : null}
                         <AvatarFallback className="text-xs">
                           {getUserInitials(user.email || "U")}
                         </AvatarFallback>
@@ -102,6 +129,12 @@ const Header = ({
                       <User className="w-4 h-4 mr-2" />
                       Perfil
                     </DropdownMenuItem>
+                    {user && isAdmin(user.email) && (
+                      <DropdownMenuItem onClick={() => navigate("/admin")}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Administração
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
                       Sair
@@ -142,6 +175,9 @@ const Header = ({
                 {user ? <>
                     <div className="flex items-center space-x-2 p-2 bg-muted rounded-lg">
                       <Avatar className="w-8 h-8">
+                        {user.user_metadata?.avatar_url ? (
+                          <AvatarImage src={user.user_metadata.avatar_url} alt="Foto do perfil" />
+                        ) : null}
                         <AvatarFallback className="text-sm">
                           {getUserInitials(user.email || "U")}
                         </AvatarFallback>
@@ -155,6 +191,15 @@ const Header = ({
                       <User className="w-4 h-4 mr-2" />
                       Perfil
                     </Button>
+                    {user && isAdmin(user.email) && (
+                      <Button variant="outline" onClick={() => {
+                  navigate("/admin");
+                  setIsMenuOpen(false);
+                }}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Administração
+                      </Button>
+                    )}
                     <Button variant="outline" onClick={() => {
                 handleLogout();
                 setIsMenuOpen(false);

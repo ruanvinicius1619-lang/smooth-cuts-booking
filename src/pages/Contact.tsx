@@ -1,12 +1,164 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import emailjs from '@emailjs/browser';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Map from "@/components/Map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Mail, Clock, Instagram } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Send, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
+
+// Schema de validação do formulário
+const contactSchema = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  phone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
+  email: z.string().email("E-mail inválido"),
+  subject: z.string().min(5, "Assunto deve ter pelo menos 5 caracteres"),
+  message: z.string().min(10, "Mensagem deve ter pelo menos 10 caracteres")
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
 
 const Contact = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema)
+  });
+
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true);
+    
+    try {
+      // Configuração do EmailJS
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+      
+      // Debug detalhado das variáveis
+      console.log('=== DEBUG EMAILJS ===');
+      console.log('Todas as variáveis import.meta.env:', import.meta.env);
+      console.log('Service ID raw:', serviceId);
+      console.log('Template ID raw:', templateId);
+      console.log('Public Key raw:', publicKey);
+      console.log('Service ID type:', typeof serviceId);
+      console.log('Template ID type:', typeof templateId);
+      console.log('Public Key type:', typeof publicKey);
+      console.log('Service ID length:', serviceId?.length);
+      console.log('Template ID length:', templateId?.length);
+      console.log('Public Key length:', publicKey?.length);
+      
+      console.log('Configurações EmailJS:', {
+            serviceId: serviceId || 'NÃO CONFIGURADO',
+            templateId: templateId || 'NÃO CONFIGURADO',
+            publicKey: publicKey ? publicKey.substring(0, 10) + '...' : 'NÃO CONFIGURADO'
+          });
+      
+      // Verifica se as variáveis de ambiente estão configuradas
+      if (!serviceId || !templateId || !publicKey) {
+        console.warn('EmailJS não configurado. Dados do formulário:', data);
+        toast.info('Configuração de e-mail pendente', {
+          description: 'Configure o EmailJS para enviar e-mails reais.'
+        });
+        
+        // Simula envio para demonstração
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        try {
+          // Inicializa EmailJS com a chave pública
+          console.log('Inicializando EmailJS...');
+          emailjs.init(publicKey);
+          
+          // Envia e-mail real usando EmailJS
+          const templateParams = {
+            from_name: data.name,
+            from_email: data.email,
+            phone: data.phone,
+            subject: data.subject,
+            message: data.message,
+            to_email: import.meta.env.VITE_CONTACT_EMAIL || 'contato@smoothcuts.com.br'
+          };
+          
+          console.log('Enviando e-mail com parâmetros:', templateParams);
+          console.log('Service ID:', serviceId);
+          console.log('Template ID:', templateId);
+          
+          const response = await emailjs.send(serviceId, templateId, templateParams);
+          console.log('E-mail enviado com sucesso:', response);
+        } catch (emailError) {
+          console.error('Erro específico do EmailJS:', emailError);
+          throw emailError; // Re-throw para ser capturado pelo catch principal
+        }
+      }
+      
+      // Mostra toast de sucesso
+      toast.success('Mensagem enviada com sucesso!', {
+        description: 'Entraremos em contato em breve.'
+      });
+      
+      setIsSubmitted(true);
+      reset();
+      
+      // Reset do estado após 3 segundos
+      setTimeout(() => {
+        setIsSubmitted(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Erro ao enviar e-mail:', error);
+      
+      // Log detalhado do erro
+      if (error instanceof Error) {
+        console.error('Mensagem do erro:', error.message);
+        console.error('Stack trace:', error.stack);
+      }
+      
+      // Verifica se é um erro específico do EmailJS
+      if (error && typeof error === 'object' && 'text' in error) {
+        console.error('Erro EmailJS:', error.text);
+        console.error('Status:', error.status);
+      }
+      
+      let errorMessage = 'Tente novamente mais tarde.';
+      
+      // Personaliza a mensagem baseada no tipo de erro
+      if (error && typeof error === 'object') {
+        if ('text' in error && error.text) {
+          errorMessage = `Erro EmailJS: ${error.text}`;
+        } else if ('message' in error && error.message) {
+          errorMessage = error.message;
+        } else if ('status' in error) {
+          errorMessage = `Erro HTTP ${error.status}: Verifique as configurações do EmailJS`;
+        }
+      }
+      
+      // Log adicional para debug
+      console.error('Detalhes completos do erro:', {
+        error,
+        serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        hasPublicKey: !!import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      });
+      
+      toast.error('Erro ao enviar mensagem', {
+        description: errorMessage
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const contactInfo = [
     {
       icon: MapPin,
@@ -78,55 +230,131 @@ const Contact = () => {
                 {/* Contact Form */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-2xl text-foreground">
-                      Envie uma Mensagem
+                    <CardTitle className="text-2xl text-foreground flex items-center gap-2">
+                      {isSubmitted ? (
+                        <>
+                          <CheckCircle className="w-6 h-6 text-green-500" />
+                          Mensagem Enviada!
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-6 h-6" />
+                          Envie uma Mensagem
+                        </>
+                      )}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-2 block">
-                          Nome
-                        </label>
-                        <Input placeholder="Seu nome completo" />
+                  <CardContent>
+                    {isSubmitted ? (
+                      <div className="text-center py-8">
+                        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
+                          Obrigado pelo contato!
+                        </h3>
+                        <p className="text-muted-foreground">
+                          Sua mensagem foi enviada com sucesso. Entraremos em contato em breve.
+                        </p>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-2 block">
-                          Telefone
-                        </label>
-                        <Input placeholder="(11) 99999-9999" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        E-mail
-                      </label>
-                      <Input placeholder="seu@email.com" type="email" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Assunto
-                      </label>
-                      <Input placeholder="Como podemos ajudar?" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Mensagem
-                      </label>
-                      <Textarea 
-                        placeholder="Descreva sua dúvida ou sugestão..."
-                        rows={5}
-                      />
-                    </div>
-                    <Button variant="premium" className="w-full">
-                      Enviar Mensagem
-                    </Button>
+                    ) : (
+                      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-foreground mb-2 block">
+                              Nome *
+                            </label>
+                            <Input 
+                              placeholder="Seu nome completo"
+                              {...register("name")}
+                              className={errors.name ? "border-red-500" : ""}
+                            />
+                            {errors.name && (
+                              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-foreground mb-2 block">
+                              Telefone *
+                            </label>
+                            <Input 
+                              placeholder="(11) 99999-9999"
+                              {...register("phone")}
+                              className={errors.phone ? "border-red-500" : ""}
+                            />
+                            {errors.phone && (
+                              <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">
+                            E-mail *
+                          </label>
+                          <Input 
+                            placeholder="seu@email.com" 
+                            type="email"
+                            {...register("email")}
+                            className={errors.email ? "border-red-500" : ""}
+                          />
+                          {errors.email && (
+                            <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">
+                            Assunto *
+                          </label>
+                          <Input 
+                            placeholder="Como podemos ajudar?"
+                            {...register("subject")}
+                            className={errors.subject ? "border-red-500" : ""}
+                          />
+                          {errors.subject && (
+                            <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">
+                            Mensagem *
+                          </label>
+                          <Textarea 
+                            placeholder="Descreva sua dúvida ou sugestão..."
+                            rows={5}
+                            {...register("message")}
+                            className={errors.message ? "border-red-500" : ""}
+                          />
+                          {errors.message && (
+                            <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>
+                          )}
+                        </div>
+                        <Button 
+                          type="submit"
+                          variant="premium" 
+                          className="w-full"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Enviando...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4 mr-2" />
+                              Enviar Mensagem
+                            </>
+                          )}
+                        </Button>
+                        <p className="text-xs text-muted-foreground text-center">
+                          * Campos obrigatórios
+                        </p>
+                      </form>
+                    )}
                   </CardContent>
                 </Card>
 
                 {/* Map and Social */}
                 <div className="space-y-8">
-                  {/* Map Placeholder */}
+                  {/* Interactive Map */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-xl text-foreground">
@@ -134,13 +362,13 @@ const Contact = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="bg-muted rounded-lg h-64 flex items-center justify-center">
-                        <div className="text-center">
-                          <MapPin className="w-12 h-12 text-accent mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            Mapa interativo em breve
-                          </p>
-                        </div>
+                      <div className="h-64 rounded-lg overflow-hidden">
+                        <Map className="h-full w-full" />
+                      </div>
+                      <div className="mt-4 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          📍 Rua das Flores, 123 - Centro, São Paulo, SP
+                        </p>
                       </div>
                     </CardContent>
                   </Card>

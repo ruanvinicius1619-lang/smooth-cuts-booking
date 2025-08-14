@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,10 +18,13 @@ import {
   ArrowLeft,
   CheckCircle
 } from "lucide-react";
+import { getServices, getBarbers } from "@/config/admin";
+import { useAdminData } from "@/hooks/useAdminData";
 
 const Booking = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { services, barbers } = useAdminData();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
@@ -29,106 +32,63 @@ const Booking = () => {
   const [selectedBarber, setSelectedBarber] = useState<string>("");
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [services, setServices] = useState<any[]>([]);
-  const [barbers, setBarbers] = useState<any[]>([]);
 
-  // Load services and barbers from database
+  // Authentication listener
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Check authentication
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user || null);
-        
-        // Load services
-        const { data: servicesData, error: servicesError } = await supabase
-          .from('services')
-          .select('*')
-          .order('name');
-        
-        if (servicesError) throw servicesError;
-        
-        // Load barbers
-        const { data: barbersData, error: barbersError } = await supabase
-          .from('barbers')
-          .select('*')
-          .order('name');
-        
-        if (barbersError) throw barbersError;
-        
-        // Transform services data
-        const transformedServices = servicesData?.map(service => ({
-          id: service.id,
-          name: service.name,
-          price: parseFloat(service.price),
-          duration: `${service.duration}min`
-        })) || [];
-        
-        // Transform barbers data
-        const transformedBarbers = barbersData?.map(barber => ({
-          id: barber.id,
-          name: barber.name,
-          specialty: barber.specialty || 'Especialista'
-        })) || [];
-        
-        // Use database services if we have enough, otherwise use fallback
-        if (transformedServices.length >= 8) {
-          setServices(transformedServices);
-        } else {
-          console.log('Usando serviços de fallback devido à quantidade insuficiente no banco');
-          setServices([
-            { id: "corte-pigmentacao", name: "Corte + Pigmentação", price: 45, duration: "50min" },
-            { id: "corte-barba", name: "Corte + Barba", price: 50, duration: "40min" },
-            { id: "corte-sobrancelhas", name: "Corte + Sobrancelhas", price: 60, duration: "50min" },
-            { id: "corte-barba-sobrancelhas", name: "Corte + Barba + Sobrancelhas", price: 60, duration: "60min" },
-            { id: "corte-tesoura", name: "Corte na Tesoura", price: 45, duration: "35min" },
-            { id: "corte-degrade", name: "Corte Degradê", price: 40, duration: "30min" },
-            { id: "corte-navalhado", name: "Corte Navalhado", price: 40, duration: "30min" },
-            { id: "barba", name: "Barba", price: 25, duration: "20min" },
-            { id: "contorno-pezinho", name: "Contorno Pezinho", price: 20, duration: "15min" },
-            { id: "corte-selagem", name: "Corte + Selagem", price: 120, duration: "90min" }
-          ]);
-        }
-        setBarbers(transformedBarbers);
-        
-      } catch (error) {
-        console.error('Error loading data:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao carregar dados. Usando dados padrão.",
-          variant: "destructive"
-        });
-        
-        // Fallback to default data
-        setServices([
-          { id: "corte-pigmentacao", name: "Corte + Pigmentação", price: 45, duration: "50min" },
-          { id: "corte-barba", name: "Corte + Barba", price: 50, duration: "40min" },
-          { id: "corte-sobrancelhas", name: "Corte + Sobrancelhas", price: 60, duration: "50min" },
-          { id: "corte-barba-sobrancelhas", name: "Corte + Barba + Sobrancelhas", price: 60, duration: "60min" },
-          { id: "corte-tesoura", name: "Corte na Tesoura", price: 45, duration: "35min" },
-          { id: "corte-degrade", name: "Corte Degradê", price: 40, duration: "30min" },
-          { id: "corte-navalhado", name: "Corte Navalhado", price: 40, duration: "30min" },
-          { id: "barba", name: "Barba", price: 25, duration: "20min" },
-          { id: "contorno-pezinho", name: "Contorno Pezinho", price: 20, duration: "15min" },
-          { id: "corte-selagem", name: "Corte + Selagem", price: 120, duration: "90min" }
-        ]);
-        
-        setBarbers([
-          { id: "carlos", name: "Carlos Silva", specialty: "Cortes clássicos" },
-          { id: "joao", name: "João Santos", specialty: "Barba e bigode" },
-          { id: "pedro", name: "Pedro Costa", specialty: "Cortes modernos" }
-        ]);
-      }
-    };
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
     
-    loadData();
-  }, [toast]);
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('DEBUG: Auth state changed:', event, session?.user?.email);
+      setUser(session?.user || null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
+  
+  // Data is now loaded automatically via useAdminData hook
+  console.log('DEBUG: Services loaded:', services);
+  console.log('DEBUG: Barbers loaded:', barbers);
 
-  const timeSlots = [
+  const allTimeSlots = [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
     "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
     "17:00", "17:30", "18:00", "18:30"
   ];
+
+  // Filter available time slots based on selected date and current time
+  const getAvailableTimeSlots = useMemo(() => {
+    if (!selectedDate) return allTimeSlots;
+    
+    const today = new Date();
+    const isToday = selectedDate.toDateString() === today.toDateString();
+    
+    if (!isToday) {
+      return allTimeSlots;
+    }
+    
+    // If it's today, filter out past time slots
+    const currentTime = today.getHours() * 60 + today.getMinutes();
+    
+    return allTimeSlots.filter(timeSlot => {
+      const [hours, minutes] = timeSlot.split(':').map(Number);
+      const slotTime = hours * 60 + minutes;
+      // Add 30 minutes buffer to allow booking
+      return slotTime > currentTime + 30;
+    });
+  }, [selectedDate]);
+
+  const timeSlots = getAvailableTimeSlots;
+
+  // Clear selected time if it's no longer available
+  useEffect(() => {
+    if (selectedTime && !timeSlots.includes(selectedTime)) {
+      setSelectedTime(null);
+    }
+  }, [timeSlots, selectedTime]);
 
   const handleNextStep = () => {
     if (currentStep < 4) {
@@ -143,7 +103,11 @@ const Booking = () => {
   };
 
   const handleConfirmBooking = async () => {
+    console.log('=== DEBUG: Iniciando agendamento ===');
+    console.log('Usuário:', user);
+    
     if (!user) {
+      console.log('DEBUG: Usuário não autenticado');
       toast({
         title: "Login necessário",
         description: "Você precisa fazer login para confirmar o agendamento.",
@@ -171,28 +135,35 @@ const Booking = () => {
         throw new Error('Serviço não encontrado');
       }
       
-      // Create booking in database
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: user.id,
-          service_id: selectedService,
-          barber_id: selectedBarber,
-          booking_date: selectedDate.toISOString().split('T')[0],
-          booking_time: selectedTime,
-          status: 'scheduled',
-          total_price: selectedServiceData.price,
-          notes: null
-        })
-        .select()
-        .single();
+      const bookingData = {
+        user_id: user.id,
+        service_id: selectedService,
+        barber_id: selectedBarber,
+        booking_date: selectedDate.toISOString().split('T')[0],
+        booking_time: selectedTime,
+        status: 'pending',
+        notes: null
+      };
       
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          throw new Error('Este horário já está ocupado. Por favor, escolha outro horário.');
-        }
-        throw error;
-      }
+      console.log('DEBUG: Dados do agendamento:', bookingData);
+      
+      // Create booking locally (without database dependency)
+      const bookingId = `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const localBooking = {
+        id: bookingId,
+        ...bookingData,
+        created_at: new Date().toISOString(),
+        service_name: selectedServiceData.name,
+        service_price: selectedServiceData.price,
+        barber_name: barbers.find(b => b.id === selectedBarber)?.name || 'Barbeiro'
+      };
+      
+      // Store booking in localStorage
+      const existingBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      existingBookings.push(localBooking);
+      localStorage.setItem('userBookings', JSON.stringify(existingBookings));
+      
+      console.log('DEBUG: Agendamento criado localmente:', localBooking);
       
       toast({
         title: "Agendamento confirmado!",
@@ -202,11 +173,11 @@ const Booking = () => {
       // Redirect to profile page
       navigate("/profile");
       
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error('Error creating booking:', error);
       toast({
         title: "Erro no agendamento",
-        description: error.message || "Erro ao criar agendamento. Tente novamente.",
+        description: error instanceof Error ? error.message : "Erro ao criar agendamento. Tente novamente.",
         variant: "destructive"
       });
     } finally {

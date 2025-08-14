@@ -82,7 +82,6 @@ export type Database = {
           booking_time: string
           status: string
           notes: string | null
-          total_price: number
           created_at: string
           updated_at: string
         }
@@ -95,7 +94,6 @@ export type Database = {
           booking_time: string
           status?: string
           notes?: string | null
-          total_price: number
           created_at?: string
           updated_at?: string
         }
@@ -108,7 +106,6 @@ export type Database = {
           booking_time?: string
           status?: string
           notes?: string | null
-          total_price?: number
           created_at?: string
           updated_at?: string
         }

@@ -6,16 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { ArrowLeft, User, Mail, Calendar, Edit2, Save, X, Clock, Scissors, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, User, Mail, Calendar, Edit2, Save, X, Clock, Scissors, CheckCircle, XCircle, Camera, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Types for bookings
-type BookingStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';
+type BookingStatus = 'pending' | 'scheduled' | 'completed' | 'cancelled' | 'no_show';
 
 interface Booking {
   id: string;
@@ -39,8 +39,10 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     email: "",
     full_name: "",
-    phone: ""
+    phone: "",
+    avatar_url: ""
   });
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -52,6 +54,7 @@ const Profile = () => {
 
   const getStatusBadge = (status: BookingStatus) => {
     const statusConfig = {
+      pending: { label: 'Pendente', variant: 'default' as const, icon: Clock },
       scheduled: { label: 'Agendado', variant: 'default' as const, icon: Clock },
       completed: { label: 'Concluído', variant: 'secondary' as const, icon: CheckCircle },
       cancelled: { label: 'Cancelado', variant: 'destructive' as const, icon: XCircle },
@@ -74,44 +77,30 @@ const Profile = () => {
     
     setBookingsLoading(true);
     try {
-      // Load upcoming bookings (scheduled status and future dates)
-      const { data: upcoming, error: upcomingError } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          services(name),
-          barbers(name)
-        `)
-        .eq('user_id', user.id)
-        .eq('status', 'scheduled')
-        .gte('booking_date', new Date().toISOString().split('T')[0])
-        .order('booking_date', { ascending: true });
+      // Load bookings from localStorage
+      const localBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      const userBookings = localBookings.filter((booking: any) => booking.user_id === user.id);
       
-      if (upcomingError) throw upcomingError;
+      const today = new Date().toISOString().split('T')[0];
       
-      // Load booking history (completed, cancelled, no_show)
-      const { data: history, error: historyError } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          services(name),
-          barbers(name)
-        `)
-        .eq('user_id', user.id)
-        .in('status', ['completed', 'cancelled', 'no_show'])
-        .order('booking_date', { ascending: false });
+      // Separate upcoming and history bookings
+      const upcoming = userBookings.filter((booking: any) => 
+        booking.status === 'pending' && booking.booking_date >= today
+      ).sort((a: any, b: any) => a.booking_date.localeCompare(b.booking_date));
       
-      if (historyError) throw historyError;
+      const history = userBookings.filter((booking: any) => 
+        ['completed', 'cancelled', 'no_show'].includes(booking.status) || booking.booking_date < today
+      ).sort((a: any, b: any) => b.booking_date.localeCompare(a.booking_date));
       
       // Transform data to match our interface
       const transformBooking = (booking: any): Booking => ({
         id: booking.id,
-        service_name: booking.services?.name || 'Serviço não encontrado',
-        barber_name: booking.barbers?.name || 'Barbeiro não encontrado',
+        service_name: booking.service_name || booking.services?.name || 'Serviço não encontrado',
+        barber_name: booking.barber_name || booking.barbers?.name || 'Barbeiro não encontrado',
         booking_date: booking.booking_date,
         booking_time: booking.booking_time,
         status: booking.status,
-        total_price: parseFloat(booking.total_price),
+        total_price: booking.service_price || booking.services?.price || 0,
         created_at: booking.created_at
       });
       
@@ -132,17 +121,20 @@ const Profile = () => {
 
   const cancelBooking = async (bookingId: string) => {
     try {
-      // Update booking status in database
-      const { error } = await supabase
-        .from('bookings')
-        .update({ 
-          status: 'cancelled',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', bookingId)
-        .eq('user_id', user?.id); // Extra security check
+      // Update booking status in localStorage
+      const localBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      const updatedBookings = localBookings.map((booking: any) => {
+        if (booking.id === bookingId && booking.user_id === user?.id) {
+          return {
+            ...booking,
+            status: 'cancelled',
+            updated_at: new Date().toISOString()
+          };
+        }
+        return booking;
+      });
       
-      if (error) throw error;
+      localStorage.setItem('userBookings', JSON.stringify(updatedBookings));
       
       // Reload bookings to reflect changes
       await loadBookings();
@@ -175,11 +167,10 @@ const Profile = () => {
         setFormData({
           email: session.user.email || "",
           full_name: session.user.user_metadata?.full_name || "",
-          phone: session.user.user_metadata?.phone || ""
+          phone: session.user.user_metadata?.phone || "",
+          avatar_url: session.user.user_metadata?.avatar_url || ""
         });
         
-        // Load bookings after user is set
-        await loadBookings();
       } catch (error) {
         console.error("Error fetching user:", error);
         toast({
@@ -195,6 +186,13 @@ const Profile = () => {
     getUser();
   }, [navigate, toast]);
 
+  // Load bookings when user changes
+  useEffect(() => {
+    if (user?.id) {
+      loadBookings();
+    }
+  }, [user]);
+
   const handleSave = async () => {
     if (!user) return;
 
@@ -203,7 +201,8 @@ const Profile = () => {
       const { error } = await supabase.auth.updateUser({
         data: {
           full_name: formData.full_name,
-          phone: formData.phone
+          phone: formData.phone,
+          avatar_url: formData.avatar_url
         }
       });
 
@@ -226,12 +225,73 @@ const Profile = () => {
     }
   };
 
+  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('Você deve selecionar uma imagem para upload.');
+      }
+      
+      const file = event.target.files[0];
+      
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Por favor, selecione apenas arquivos de imagem.');
+      }
+      
+      // Validar tamanho do arquivo (máximo 2MB para base64)
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error('A imagem deve ter no máximo 2MB.');
+      }
+      
+      console.log('Convertendo imagem para base64...');
+      
+      // Converter imagem para base64
+      const reader = new FileReader();
+      
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          if (reader.result && typeof reader.result === 'string') {
+            resolve(reader.result);
+          } else {
+            reject(new Error('Erro ao converter imagem'));
+          }
+        };
+        reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+        reader.readAsDataURL(file);
+      });
+      
+      const base64Data = await base64Promise;
+      console.log('Imagem convertida com sucesso');
+      
+      // Atualizar o estado local
+      setFormData(prev => ({ ...prev, avatar_url: base64Data }));
+      
+      toast({
+        title: "Sucesso",
+        description: "Foto de perfil carregada com sucesso!"
+      });
+      
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao carregar a foto. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleCancel = () => {
     if (user) {
       setFormData({
         email: user.email || "",
         full_name: user.user_metadata?.full_name || "",
-        phone: user.user_metadata?.phone || ""
+        phone: user.user_metadata?.phone || "",
+        avatar_url: user.user_metadata?.avatar_url || ""
       });
     }
     setIsEditing(false);
@@ -308,11 +368,37 @@ const Profile = () => {
                   <Card>
                     <CardHeader className="text-center">
                       <div className="flex justify-center mb-4">
-                        <Avatar className="w-24 h-24">
-                          <AvatarFallback className="text-2xl">
-                            {getUserInitials(user.email || "U")}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <Avatar className="w-24 h-24">
+                            {formData.avatar_url ? (
+                              <AvatarImage src={formData.avatar_url} alt="Foto do perfil" />
+                            ) : null}
+                            <AvatarFallback className="text-2xl">
+                              {getUserInitials(user.email || "U")}
+                            </AvatarFallback>
+                          </Avatar>
+                          {isEditing && (
+                            <div className="absolute -bottom-2 -right-2">
+                              <label htmlFor="avatar-upload" className="cursor-pointer">
+                                <div className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:bg-primary/90 transition-colors">
+                                  {uploading ? (
+                                    <Upload className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Camera className="w-4 h-4" />
+                                  )}
+                                </div>
+                              </label>
+                              <input
+                                id="avatar-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={uploadAvatar}
+                                disabled={uploading}
+                                className="hidden"
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <CardTitle className="flex items-center justify-center gap-2">
                         <User className="w-5 h-5" />
