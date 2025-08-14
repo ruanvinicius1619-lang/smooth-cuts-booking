@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import emailjs from '@emailjs/browser';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Map from "@/components/Map";
@@ -40,10 +41,33 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      // Simula envio da mensagem (aqui você pode integrar com um serviço real)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Configuração do EmailJS
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
       
-      console.log('Dados do formulário:', data);
+      // Verifica se as variáveis de ambiente estão configuradas
+      if (!serviceId || !templateId || !publicKey) {
+        console.warn('EmailJS não configurado. Dados do formulário:', data);
+        toast.info('Configuração de e-mail pendente', {
+          description: 'Configure o EmailJS para enviar e-mails reais.'
+        });
+        
+        // Simula envio para demonstração
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        // Envia e-mail real usando EmailJS
+        const templateParams = {
+          from_name: data.name,
+          from_email: data.email,
+          phone: data.phone,
+          subject: data.subject,
+          message: data.message,
+          to_email: import.meta.env.VITE_CONTACT_EMAIL || 'contato@smoothcuts.com.br'
+        };
+        
+        await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      }
       
       // Mostra toast de sucesso
       toast.success('Mensagem enviada com sucesso!', {
@@ -59,6 +83,7 @@ const Contact = () => {
       }, 3000);
       
     } catch (error) {
+      console.error('Erro ao enviar e-mail:', error);
       toast.error('Erro ao enviar mensagem', {
         description: 'Tente novamente mais tarde.'
       });
