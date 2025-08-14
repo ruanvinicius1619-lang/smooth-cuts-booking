@@ -84,11 +84,16 @@ const Booking = () => {
         
         // Fallback to default data
         setServices([
-          { id: "corte", name: "Corte de Cabelo", price: 35, duration: "45min" },
-          { id: "barba", name: "Barba Completa", price: 25, duration: "30min" },
-          { id: "combo", name: "Corte + Barba", price: 55, duration: "60min" },
-          { id: "sobrancelha", name: "Design de Sobrancelha", price: 15, duration: "20min" },
-          { id: "premium", name: "Tratamento Premium", price: 85, duration: "90min" }
+          { id: "corte-pigmentacao", name: "Corte + Pigmentação", price: 45, duration: "50min" },
+          { id: "corte-barba", name: "Corte + Barba", price: 50, duration: "40min" },
+          { id: "corte-sobrancelhas", name: "Corte + Sobrancelhas", price: 60, duration: "50min" },
+          { id: "corte-barba-sobrancelhas", name: "Corte + Barba + Sobrancelhas", price: 60, duration: "60min" },
+          { id: "corte-tesoura", name: "Corte na Tesoura", price: 45, duration: "35min" },
+          { id: "corte-degrade", name: "Corte Degradê", price: 40, duration: "30min" },
+          { id: "corte-navalhado", name: "Corte Navalhado", price: 40, duration: "30min" },
+          { id: "barba", name: "Barba", price: 25, duration: "20min" },
+          { id: "contorno-pezinho", name: "Contorno Pezinho", price: 20, duration: "15min" },
+          { id: "corte-selagem", name: "Corte + Selagem", price: 120, duration: "90min" }
         ]);
         
         setBarbers([
@@ -267,7 +272,7 @@ const Booking = () => {
                       <h2 className="text-2xl font-bold text-foreground mb-6">
                         Escolha seu Serviço
                       </h2>
-                      <div className="grid md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {services.map((service) => (
                           <Card 
                             key={service.id}

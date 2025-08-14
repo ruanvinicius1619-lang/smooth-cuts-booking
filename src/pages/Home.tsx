@@ -15,25 +15,25 @@ const Home = () => {
   const services = [
     {
       id: 1,
-      title: "Corte Tradicional",
-      description: "Corte clássico com acabamento profissional",
-      price: "R$ 35",
+      title: "Corte + Pigmentação",
+      description: "Corte moderno com pigmentação profissional",
+      price: "R$ 45",
       image: barberService,
       icon: Scissors
     },
     {
       id: 2,
       title: "Corte + Barba",
-      description: "Pacote completo com corte e barba",
+      description: "Combo completo com corte e barba modelada",
       price: "R$ 50",
       image: beardGrooming,
       icon: Award
     },
     {
       id: 3,
-      title: "Tratamentos",
-      description: "Cuidados especiais para cabelo e couro cabeludo",
-      price: "R$ 45",
+      title: "Corte + Selagem",
+      description: "Corte com tratamento de selagem premium",
+      price: "R$ 120",
       image: hairStyling,
       icon: Star
     }

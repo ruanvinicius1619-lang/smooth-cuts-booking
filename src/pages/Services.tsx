@@ -11,58 +11,94 @@ const Services = () => {
   const navigate = useNavigate();
   const services = [{
     id: 1,
-    title: "Corte Tradicional",
-    description: "Corte clássico com técnicas tradicionais, acabamento profissional e lavagem completa",
-    price: "R$ 35",
-    duration: "45 min",
+    title: "Corte + Pigmentação",
+    description: "Corte moderno com pigmentação para realçar o visual e cobrir fios grisalhos",
+    price: "R$ 45",
+    duration: "50 min",
     image: barberService,
     icon: Scissors,
-    features: ["Consulta personalizada", "Lavagem e condicionador", "Finalização com pomada", "Toalha quente"]
+    features: ["Corte personalizado", "Pigmentação profissional", "Produtos premium", "Acabamento impecável"]
   }, {
     id: 2,
-    title: "Corte Moderno",
-    description: "Cortes contemporâneos e estilizados com as últimas tendências da moda masculina",
-    price: "R$ 45",
-    duration: "60 min",
-    image: hairStyling,
-    icon: Star,
-    features: ["Design personalizado", "Técnicas modernas", "Produtos premium", "Styling profissional"]
-  }, {
-    id: 3,
-    title: "Barba Completa",
-    description: "Aparar, modelar e cuidar da barba com produtos especializados e técnicas profissionais",
-    price: "R$ 30",
-    duration: "35 min",
+    title: "Corte + Barba",
+    description: "Combo completo com corte de cabelo e barba modelada para um visual renovado",
+    price: "R$ 50",
+    duration: "40 min",
     image: beardGrooming,
     icon: Award,
-    features: ["Aparar e modelar", "Óleos nutritivos", "Balm hidratante", "Toalha quente relaxante"]
+    features: ["Corte estilizado", "Barba modelada", "Óleos nutritivos", "Toalha quente"]
   }, {
-    id: 4,
-    title: "Corte + Barba",
-    description: "Pacote completo com corte de cabelo e cuidados com a barba para um visual renovado",
+    id: 3,
+    title: "Corte + Sobrancelhas",
+    description: "Corte de cabelo com design e modelagem de sobrancelhas para um look completo",
     price: "R$ 60",
-    duration: "90 min",
-    image: beardGrooming,
-    icon: Sparkles,
-    features: ["Serviço completo", "Economia de R$ 15", "Tratamento premium", "Resultado garantido"]
-  }, {
-    id: 5,
-    title: "Tratamento Capilar",
-    description: "Cuidados especiais para cabelo e couro cabeludo com produtos terapêuticos",
-    price: "R$ 50",
     duration: "50 min",
     image: hairStyling,
     icon: Star,
-    features: ["Análise do cabelo", "Tratamento personalizado", "Massagem relaxante", "Produtos terapêuticos"]
+    features: ["Corte profissional", "Design de sobrancelhas", "Acabamento detalhado", "Visual harmonioso"]
+  }, {
+    id: 4,
+    title: "Corte + Barba + Sobrancelhas",
+    description: "Pacote completo com todos os cuidados para um visual impecável",
+    price: "R$ 60",
+    duration: "60 min",
+    image: barberService,
+    icon: Sparkles,
+    features: ["Serviço completo", "Visual harmonioso", "Acabamento premium", "Resultado garantido"]
+  }, {
+    id: 5,
+    title: "Corte na Tesoura",
+    description: "Corte tradicional feito exclusivamente na tesoura para um acabamento clássico",
+    price: "R$ 45",
+    duration: "35 min",
+    image: hairStyling,
+    icon: Scissors,
+    features: ["Técnica tradicional", "Corte na tesoura", "Acabamento clássico", "Precisão artesanal"]
   }, {
     id: 6,
-    title: "Experiência Premium",
-    description: "O pacote completo com todos os nossos serviços para uma experiência única",
-    price: "R$ 95",
-    duration: "120 min",
+    title: "Corte Degradê",
+    description: "Corte moderno com degradê nas laterais para um visual contemporâneo",
+    price: "R$ 40",
+    duration: "30 min",
     image: barberService,
-    icon: Users,
-    features: ["Todos os serviços", "Atendimento VIP", "Bebida incluída", "Massagem relaxante"]
+    icon: Star,
+    features: ["Degradê profissional", "Técnicas modernas", "Visual contemporâneo", "Acabamento preciso"]
+  }, {
+    id: 7,
+    title: "Corte Navalhado",
+    description: "Corte com acabamento na navalha para um visual mais definido e marcante",
+    price: "R$ 40",
+    duration: "30 min",
+    image: beardGrooming,
+    icon: Award,
+    features: ["Acabamento na navalha", "Visual definido", "Técnica especializada", "Resultado marcante"]
+  }, {
+    id: 8,
+    title: "Barba",
+    description: "Aparar e modelar a barba com produtos especializados e técnicas profissionais",
+    price: "R$ 25",
+    duration: "20 min",
+    image: beardGrooming,
+    icon: Award,
+    features: ["Aparar e modelar", "Óleos nutritivos", "Balm hidratante", "Toalha quente"]
+  }, {
+    id: 9,
+    title: "Contorno Pezinho",
+    description: "Acabamento e contorno do pezinho para um visual sempre alinhado",
+    price: "R$ 20",
+    duration: "15 min",
+    image: hairStyling,
+    icon: Scissors,
+    features: ["Contorno preciso", "Acabamento profissional", "Visual alinhado", "Manutenção rápida"]
+  }, {
+    id: 10,
+    title: "Corte + Selagem",
+    description: "Corte com tratamento de selagem para cabelos mais saudáveis e brilhantes",
+    price: "R$ 120",
+    duration: "90 min",
+    image: hairStyling,
+    icon: Sparkles,
+    features: ["Corte personalizado", "Tratamento de selagem", "Produtos premium", "Cabelos revitalizados"]
   }];
   const handleBookService = (serviceId: number) => {
     navigate(`/booking?service=${serviceId}`);

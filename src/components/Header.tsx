@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Menu, X, Scissors, User, LogOut } from "lucide-react";
+import { Calendar, Menu, X, User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -67,8 +67,8 @@ const Header = ({
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/")}>
-            <div className="w-10 h-10 bg-gradient-gold rounded-lg flex items-center justify-center">
-              <Scissors className="w-6 h-6 text-barbershop-black" />
+            <div className="w-12 h-12 flex items-center justify-center">
+              <img src="/src/assets/barbershop-logo.svg" alt="Barbershop Logo" className="w-12 h-12" />
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-xl text-foreground">Mateus BarberShop</span>

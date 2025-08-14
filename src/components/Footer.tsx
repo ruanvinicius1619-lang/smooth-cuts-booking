@@ -51,10 +51,10 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-accent">Serviços</h4>
             <ul className="space-y-2">
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte Tradicional</li>
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Barba & Bigode</li>
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Tratamentos Capilares</li>
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Relaxamento</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte + Pigmentação</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte + Barba</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte + Selagem</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte Degradê</li>
             </ul>
           </div>
         </div>
