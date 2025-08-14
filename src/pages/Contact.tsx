@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Map from "@/components/Map";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -127,7 +128,7 @@ const Contact = () => {
 
                 {/* Map and Social */}
                 <div className="space-y-8">
-                  {/* Map Placeholder */}
+                  {/* Interactive Map */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-xl text-foreground">
@@ -135,13 +136,13 @@ const Contact = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="bg-muted rounded-lg h-64 flex items-center justify-center">
-                        <div className="text-center">
-                          <MapPin className="w-12 h-12 text-accent mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            Mapa interativo em breve
-                          </p>
-                        </div>
+                      <div className="h-64 rounded-lg overflow-hidden">
+                        <Map className="h-full w-full" />
+                      </div>
+                      <div className="mt-4 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          📍 Rua das Flores, 123 - Centro, São Paulo, SP
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
