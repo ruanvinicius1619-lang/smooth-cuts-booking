@@ -1,12 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 import { Calendar, Star, Scissors, Clock, Award, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
 import heroImage from "@/assets/barbershop-hero.jpg";
 import barberService from "@/assets/barber-service.jpg";
 import hairStyling from "@/assets/hair-styling.jpg";
@@ -14,55 +11,6 @@ import beardGrooming from "@/assets/beard-grooming.jpg";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      console.log('Auth state changed:', event, session?.user?.email);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const testLogout = async () => {
-    console.log('Testando logout...');
-    try {
-      // Primeira tentativa: logout normal
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.warn('Erro no logout normal, tentando logout local:', error);
-        
-        // Segunda tentativa: logout apenas local
-        const { error: localError } = await supabase.auth.signOut({ scope: 'local' });
-        
-        if (localError) {
-          console.warn('Erro no logout local, forçando limpeza manual:', localError);
-          
-          // Terceira tentativa: limpeza manual
-          localStorage.removeItem('sb-jheywkeofcttgdgquawm-auth-token');
-          localStorage.removeItem('supabase.auth.token');
-          
-          // Força atualização do estado
-          window.location.reload();
-          return;
-        }
-      }
-      
-      console.log('Logout de teste realizado com sucesso');
-    } catch (error) {
-      console.error('Erro inesperado no logout de teste, forçando limpeza:', error);
-      localStorage.clear();
-      window.location.reload();
-    }
-  };
 
   const services = [
     {
@@ -118,11 +66,6 @@ const Home = () => {
           <p className="text-xl md:text-2xl mb-8 text-barbershop-gray-light animate-fade-in">
             A experiência completa em cuidados masculinos com o melhor da tradição e modernidade
           </p>
-          {user && (
-            <p className="text-sm text-green-400 mb-4">
-              Logado como: {user.email}
-            </p>
-          )}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in">
             <Button 
               variant="premium" 
@@ -141,16 +84,6 @@ const Home = () => {
             >
               Ver Serviços
             </Button>
-            {user && (
-              <Button 
-                variant="outline" 
-                size="lg" 
-                onClick={testLogout}
-                className="text-lg px-8 py-6 bg-red-500 text-white hover:bg-red-600"
-              >
-                Teste Logout
-              </Button>
-            )}
           </div>
         </div>
       </section>

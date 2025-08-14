@@ -57,35 +57,26 @@ const Header = ({
   };
   const handleLogout = async () => {
     try {
-      console.log('Iniciando logout...');
-      
       // Primeira tentativa: logout normal
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.warn('Erro no logout normal, tentando logout local:', error);
-        
-        // Segunda tentativa: logout apenas local (sem chamar API)
+        // Segunda tentativa: logout apenas local
         const { error: localError } = await supabase.auth.signOut({ scope: 'local' });
         
         if (localError) {
-          console.warn('Erro no logout local, forçando limpeza manual:', localError);
-          
           // Terceira tentativa: limpeza manual
           localStorage.removeItem('sb-jheywkeofcttgdgquawm-auth-token');
           localStorage.removeItem('supabase.auth.token');
           
-          // Força atualização do estado de auth
+          // Força atualização do estado
           window.location.reload();
           return;
         }
       }
       
-      console.log('Logout realizado com sucesso');
       navigate("/");
     } catch (error) {
-      console.error('Erro inesperado no logout, forçando limpeza:', error);
-      
       // Fallback final: limpeza manual e reload
       localStorage.clear();
       window.location.href = '/';
