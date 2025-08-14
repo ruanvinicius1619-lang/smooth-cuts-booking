@@ -41,7 +41,7 @@ const DiagnosticFloatingButton = () => {
     <>
       <Button
         onClick={() => setShowDiagnostic(true)}
-        className={`fixed bottom-4 right-4 z-40 rounded-full w-12 h-12 p-0 shadow-lg ${
+        className={`fixed bottom-24 right-4 z-40 rounded-full w-12 h-12 p-0 shadow-lg ${
           hasUnhandledErrors 
             ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
             : 'bg-yellow-600 hover:bg-yellow-700'
