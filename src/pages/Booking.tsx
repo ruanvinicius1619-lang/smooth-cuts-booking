@@ -29,8 +29,17 @@ const Booking = () => {
   const [selectedBarber, setSelectedBarber] = useState<string>("");
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [services, setServices] = useState<any[]>([]);
-  const [barbers, setBarbers] = useState<any[]>([]);
+  const [services, setServices] = useState<{
+    id: string;
+    name: string;
+    price: number;
+    duration: string;
+  }[]>([]);
+  const [barbers, setBarbers] = useState<{
+    id: string;
+    name: string;
+    specialty: string;
+  }[]>([]);
 
   // Authentication listener
   useEffect(() => {
@@ -74,7 +83,7 @@ const Booking = () => {
           id: service.id,
           name: service.name,
           price: parseFloat(service.price),
-          duration: `${service.duration_minutes}min`
+          duration: `${service.duration || 0}min`
         })) || [];
         
         // Transform barbers data
@@ -205,11 +214,11 @@ const Booking = () => {
       // Redirect to profile page
       navigate("/profile");
       
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error('Error creating booking:', error);
       toast({
         title: "Erro no agendamento",
-        description: error.message || "Erro ao criar agendamento. Tente novamente.",
+        description: error instanceof Error ? error.message : "Erro ao criar agendamento. Tente novamente.",
         variant: "destructive"
       });
     } finally {
