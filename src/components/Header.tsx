@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Menu, X, Scissors, User, LogOut } from "lucide-react";
+import { Calendar, Menu, X, Scissors, User, LogOut, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { isAdmin } from "@/config/admin";
 interface HeaderProps {
   onBookingClick?: () => void;
 }
@@ -128,6 +129,12 @@ const Header = ({
                       <User className="w-4 h-4 mr-2" />
                       Perfil
                     </DropdownMenuItem>
+                    {user && isAdmin(user.email) && (
+                      <DropdownMenuItem onClick={() => navigate("/admin")}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Administração
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
                       Sair
@@ -184,6 +191,15 @@ const Header = ({
                       <User className="w-4 h-4 mr-2" />
                       Perfil
                     </Button>
+                    {user && isAdmin(user.email) && (
+                      <Button variant="outline" onClick={() => {
+                  navigate("/admin");
+                  setIsMenuOpen(false);
+                }}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Administração
+                      </Button>
+                    )}
                     <Button variant="outline" onClick={() => {
                 handleLogout();
                 setIsMenuOpen(false);

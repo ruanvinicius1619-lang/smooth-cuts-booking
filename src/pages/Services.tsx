@@ -4,12 +4,34 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Scissors, Award, Star, Clock, Sparkles, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAdminData } from "@/hooks/useAdminData";
 import barberService from "@/assets/barber-service.jpg";
 import hairStyling from "@/assets/hair-styling.jpg";
 import beardGrooming from "@/assets/beard-grooming.jpg";
 const Services = () => {
   const navigate = useNavigate();
-  const services = [{
+  const { services: adminServices } = useAdminData();
+  
+  // Fallback services with images for display
+  const servicesWithImages = adminServices.map((service, index) => {
+    const images = [barberService, hairStyling, beardGrooming];
+    const icons = [Scissors, Star, Award, Sparkles, Users];
+    
+    return {
+      ...service,
+      image: images[index % images.length],
+      icon: icons[index % icons.length],
+      features: [
+        "Atendimento personalizado",
+        "Produtos de qualidade",
+        "Profissionais experientes",
+        "Ambiente acolhedor"
+      ]
+    };
+  });
+  
+  // Keep original static services as fallback
+  const staticServices = [{
     id: 1,
     title: "Corte Tradicional",
     description: "Corte clássico com técnicas tradicionais, acabamento profissional e lavagem completa",
@@ -87,7 +109,7 @@ const Services = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map(service => <Card key={service.id} className="overflow-hidden shadow-card hover:shadow-elegant transition-smooth group">
+            {(servicesWithImages.length > 0 ? servicesWithImages : staticServices).map(service => <Card key={service.id} className="overflow-hidden shadow-card hover:shadow-elegant transition-smooth group">
                 <div className="relative h-48 overflow-hidden">
                   <img src={service.image} alt={service.title} className="w-full h-full object-cover group-hover:scale-110 transition-smooth" />
                   <div className="absolute inset-0 bg-gradient-black opacity-40"></div>
@@ -97,13 +119,13 @@ const Services = () => {
                     </div>
                   </div>
                   <div className="absolute top-4 right-4 bg-accent text-barbershop-black px-3 py-1 rounded-full font-semibold">
-                    {service.price}
+                    {typeof service.price === 'number' ? `R$ ${service.price}` : service.price}
                   </div>
                 </div>
                 
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-xl font-semibold text-foreground">{service.title}</h3>
+                    <h3 className="text-xl font-semibold text-foreground">{service.title || service.name}</h3>
                     <div className="flex items-center text-barbershop-gray">
                       <Clock className="w-4 h-4 mr-1" />
                       <span className="text-sm">{service.duration}</span>

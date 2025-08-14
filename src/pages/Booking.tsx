@@ -18,10 +18,13 @@ import {
   ArrowLeft,
   CheckCircle
 } from "lucide-react";
+import { getServices, getBarbers } from "@/config/admin";
+import { useAdminData } from "@/hooks/useAdminData";
 
 const Booking = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { services, barbers } = useAdminData();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
@@ -29,17 +32,6 @@ const Booking = () => {
   const [selectedBarber, setSelectedBarber] = useState<string>("");
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [services, setServices] = useState<{
-    id: string;
-    name: string;
-    price: number;
-    duration: string;
-  }[]>([]);
-  const [barbers, setBarbers] = useState<{
-    id: string;
-    name: string;
-    specialty: string;
-  }[]>([]);
 
   // Authentication listener
   useEffect(() => {
@@ -57,75 +49,9 @@ const Booking = () => {
     return () => subscription.unsubscribe();
   }, []);
   
-  // Load services and barbers - using static data to avoid database connection issues
-  useEffect(() => {
-    // Use static data by default to avoid connection errors
-    const defaultServices = [
-      { id: "corte", name: "Corte de Cabelo", price: 35, duration: "45min" },
-      { id: "barba", name: "Barba Completa", price: 25, duration: "30min" },
-      { id: "combo", name: "Corte + Barba", price: 55, duration: "60min" },
-      { id: "sobrancelha", name: "Design de Sobrancelha", price: 15, duration: "20min" },
-      { id: "premium", name: "Tratamento Premium", price: 85, duration: "90min" }
-    ];
-    
-    const defaultBarbers = [
-      { id: "carlos", name: "Carlos Silva", specialty: "Cortes clássicos" },
-      { id: "joao", name: "João Santos", specialty: "Barba e bigode" },
-      { id: "pedro", name: "Pedro Costa", specialty: "Cortes modernos" }
-    ];
-    
-    setServices(defaultServices);
-    setBarbers(defaultBarbers);
-    
-    // Optionally try to load from database in background (without blocking UI)
-    const loadDataFromDatabase = async () => {
-      try {
-        // Only try database if we have a valid session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-        
-        // Load services
-        const { data: servicesData, error: servicesError } = await supabase
-          .from('services')
-          .select('*')
-          .order('name');
-        
-        // Load barbers
-        const { data: barbersData, error: barbersError } = await supabase
-          .from('barbers')
-          .select('*')
-          .order('name');
-        
-        // Only update if both queries succeeded and have data
-        if (!servicesError && !barbersError && servicesData && barbersData) {
-          const transformedServices = servicesData.map(service => ({
-            id: service.id,
-            name: service.name,
-            price: parseFloat(service.price),
-            duration: `${service.duration || 0}min`
-          }));
-          
-          const transformedBarbers = barbersData.map(barber => ({
-            id: barber.id,
-            name: barber.name,
-            specialty: barber.specialty || 'Especialista'
-          }));
-          
-          setServices(transformedServices);
-          setBarbers(transformedBarbers);
-          
-          console.log('✅ Dados carregados do banco de dados com sucesso');
-        }
-        
-      } catch (error) {
-        // Silently fail - we already have default data loaded
-        console.log('ℹ️ Usando dados padrão (banco indisponível):', error);
-      }
-    };
-    
-    // Load from database in background after a short delay
-    setTimeout(loadDataFromDatabase, 1000);
-  }, []);
+  // Data is now loaded automatically via useAdminData hook
+  console.log('DEBUG: Services loaded:', services);
+  console.log('DEBUG: Barbers loaded:', barbers);
 
   const allTimeSlots = [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
