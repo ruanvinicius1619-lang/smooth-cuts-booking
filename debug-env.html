@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Environment Variables</title>
+</head>
+<body>
+    <h1>Debug Environment Variables</h1>
+    <div id="output"></div>
+    
+    <script>
+        // Simula como o Vite carrega as variáveis
+        const envVars = {
+            VITE_EMAILJS_SERVICE_ID: 'service_cypt9qh',
+            VITE_EMAILJS_TEMPLATE_ID: 'template_jrntuna', 
+            VITE_EMAILJS_PUBLIC_KEY: '2xNo3p1NTSk0-1Goa',
+            VITE_CONTACT_EMAIL: 'egrinaldo19@gmail.com'
+        };
+        
+        const output = document.getElementById('output');
+        
+        output.innerHTML = `
+            <h2>Variáveis de Ambiente:</h2>
+            <ul>
+                <li><strong>Service ID:</strong> ${envVars.VITE_EMAILJS_SERVICE_ID || 'NÃO CONFIGURADO'}</li>
+                <li><strong>Template ID:</strong> ${envVars.VITE_EMAILJS_TEMPLATE_ID || 'NÃO CONFIGURADO'}</li>
+                <li><strong>Public Key:</strong> ${envVars.VITE_EMAILJS_PUBLIC_KEY ? envVars.VITE_EMAILJS_PUBLIC_KEY.substring(0, 10) + '...' : 'NÃO CONFIGURADO'}</li>
+                <li><strong>Contact Email:</strong> ${envVars.VITE_CONTACT_EMAIL || 'NÃO CONFIGURADO'}</li>
+            </ul>
+            
+            <h2>Verificação:</h2>
+            <p><strong>Todas configuradas?</strong> ${envVars.VITE_EMAILJS_SERVICE_ID && envVars.VITE_EMAILJS_TEMPLATE_ID && envVars.VITE_EMAILJS_PUBLIC_KEY ? 'SIM ✅' : 'NÃO ❌'}</p>
+        `;
+        
+        console.log('Debug Environment Variables:', envVars);
+    </script>
+</body>
+</html>

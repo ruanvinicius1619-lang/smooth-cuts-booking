@@ -46,6 +46,19 @@ const Contact = () => {
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
       
+      // Debug detalhado das variáveis
+      console.log('=== DEBUG EMAILJS ===');
+      console.log('Todas as variáveis import.meta.env:', import.meta.env);
+      console.log('Service ID raw:', serviceId);
+      console.log('Template ID raw:', templateId);
+      console.log('Public Key raw:', publicKey);
+      console.log('Service ID type:', typeof serviceId);
+      console.log('Template ID type:', typeof templateId);
+      console.log('Public Key type:', typeof publicKey);
+      console.log('Service ID length:', serviceId?.length);
+      console.log('Template ID length:', templateId?.length);
+      console.log('Public Key length:', publicKey?.length);
+      
       console.log('Configurações EmailJS:', {
             serviceId: serviceId || 'NÃO CONFIGURADO',
             templateId: templateId || 'NÃO CONFIGURADO',
