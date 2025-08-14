@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface HeaderProps {
   onBookingClick?: () => void;
 }
@@ -113,6 +113,9 @@ const Header = ({
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex items-center space-x-2">
                       <Avatar className="w-6 h-6">
+                        {user.user_metadata?.avatar_url ? (
+                          <AvatarImage src={user.user_metadata.avatar_url} alt="Foto do perfil" />
+                        ) : null}
                         <AvatarFallback className="text-xs">
                           {getUserInitials(user.email || "U")}
                         </AvatarFallback>
@@ -165,6 +168,9 @@ const Header = ({
                 {user ? <>
                     <div className="flex items-center space-x-2 p-2 bg-muted rounded-lg">
                       <Avatar className="w-8 h-8">
+                        {user.user_metadata?.avatar_url ? (
+                          <AvatarImage src={user.user_metadata.avatar_url} alt="Foto do perfil" />
+                        ) : null}
                         <AvatarFallback className="text-sm">
                           {getUserInitials(user.email || "U")}
                         </AvatarFallback>

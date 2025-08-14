@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { ArrowLeft, User, Mail, Calendar, Edit2, Save, X, Clock, Scissors, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, User, Mail, Calendar, Edit2, Save, X, Clock, Scissors, CheckCircle, XCircle, Camera, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Types for bookings
@@ -39,8 +39,10 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     email: "",
     full_name: "",
-    phone: ""
+    phone: "",
+    avatar_url: ""
   });
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -184,7 +186,8 @@ const Profile = () => {
         setFormData({
           email: session.user.email || "",
           full_name: session.user.user_metadata?.full_name || "",
-          phone: session.user.user_metadata?.phone || ""
+          phone: session.user.user_metadata?.phone || "",
+          avatar_url: session.user.user_metadata?.avatar_url || ""
         });
         
       } catch (error) {
@@ -217,7 +220,8 @@ const Profile = () => {
       const { error } = await supabase.auth.updateUser({
         data: {
           full_name: formData.full_name,
-          phone: formData.phone
+          phone: formData.phone,
+          avatar_url: formData.avatar_url
         }
       });
 
@@ -240,12 +244,90 @@ const Profile = () => {
     }
   };
 
+  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('Você deve selecionar uma imagem para upload.');
+      }
+      
+      const file = event.target.files[0];
+      
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Por favor, selecione apenas arquivos de imagem.');
+      }
+      
+      // Validar tamanho do arquivo (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('A imagem deve ter no máximo 5MB.');
+      }
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
+      const filePath = fileName;
+      
+      // Verificar se o bucket existe, se não, tentar criar
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const avatarBucket = buckets?.find(bucket => bucket.name === 'avatars');
+      
+      if (!avatarBucket) {
+        const { error: bucketError } = await supabase.storage.createBucket('avatars', {
+          public: true,
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'],
+          fileSizeLimit: 5242880 // 5MB
+        });
+        
+        if (bucketError) {
+          console.log('Bucket creation error (may already exist):', bucketError);
+        }
+      }
+      
+      // Upload da imagem para o Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      // Obter URL pública da imagem
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+      
+      // Atualizar o estado local
+      setFormData(prev => ({ ...prev, avatar_url: data.publicUrl }));
+      
+      toast({
+        title: "Sucesso",
+        description: "Foto de perfil carregada com sucesso!"
+      });
+      
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao carregar a foto. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleCancel = () => {
     if (user) {
       setFormData({
         email: user.email || "",
         full_name: user.user_metadata?.full_name || "",
-        phone: user.user_metadata?.phone || ""
+        phone: user.user_metadata?.phone || "",
+        avatar_url: user.user_metadata?.avatar_url || ""
       });
     }
     setIsEditing(false);
@@ -322,11 +404,37 @@ const Profile = () => {
                   <Card>
                     <CardHeader className="text-center">
                       <div className="flex justify-center mb-4">
-                        <Avatar className="w-24 h-24">
-                          <AvatarFallback className="text-2xl">
-                            {getUserInitials(user.email || "U")}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <Avatar className="w-24 h-24">
+                            {formData.avatar_url ? (
+                              <AvatarImage src={formData.avatar_url} alt="Foto do perfil" />
+                            ) : null}
+                            <AvatarFallback className="text-2xl">
+                              {getUserInitials(user.email || "U")}
+                            </AvatarFallback>
+                          </Avatar>
+                          {isEditing && (
+                            <div className="absolute -bottom-2 -right-2">
+                              <label htmlFor="avatar-upload" className="cursor-pointer">
+                                <div className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:bg-primary/90 transition-colors">
+                                  {uploading ? (
+                                    <Upload className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Camera className="w-4 h-4" />
+                                  )}
+                                </div>
+                              </label>
+                              <input
+                                id="avatar-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={uploadAvatar}
+                                disabled={uploading}
+                                className="hidden"
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <CardTitle className="flex items-center justify-center gap-2">
                         <User className="w-5 h-5" />
