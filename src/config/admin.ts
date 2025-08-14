@@ -103,11 +103,16 @@ export const saveBarbers = (barbers: any[]) => {
 
 // Serviços padrão
 const getDefaultServices = () => [
-  { id: "corte", name: "Corte de Cabelo", price: 35, duration: "45min", description: "Corte clássico com técnicas tradicionais" },
-  { id: "barba", name: "Barba Completa", price: 25, duration: "30min", description: "Aparar, modelar e cuidar da barba" },
-  { id: "combo", name: "Corte + Barba", price: 55, duration: "60min", description: "Pacote completo com desconto" },
-  { id: "sobrancelha", name: "Design de Sobrancelha", price: 15, duration: "20min", description: "Modelagem profissional" },
-  { id: "premium", name: "Tratamento Premium", price: 85, duration: "90min", description: "Experiência completa VIP" }
+  { id: "corte-pigmentacao", name: "Corte + Pigmentação", price: 45, duration: "50min", description: "Corte de cabelo com pigmentação" },
+  { id: "corte-barba", name: "Corte + Barba", price: 50, duration: "40min", description: "Combo completo de corte e barba" },
+  { id: "corte-sobrancelhas", name: "Corte + Sobrancelhas", price: 60, duration: "50min", description: "Corte de cabelo com design de sobrancelhas" },
+  { id: "corte-barba-sobrancelhas", name: "Corte + Barba + Sobrancelhas", price: 60, duration: "60min", description: "Combo completo com todos os serviços" },
+  { id: "corte-tesoura", name: "Corte na Tesoura", price: 45, duration: "35min", description: "Corte tradicional feito na tesoura" },
+  { id: "corte-degrade", name: "Corte Degradê", price: 40, duration: "30min", description: "Corte moderno com degradê" },
+  { id: "corte-navalhado", name: "Corte Navalhado", price: 40, duration: "30min", description: "Corte com acabamento na navalha" },
+  { id: "barba", name: "Barba", price: 25, duration: "20min", description: "Aparar e modelar a barba" },
+  { id: "contorno-pezinho", name: "Contorno Pezinho", price: 20, duration: "15min", description: "Contorno e acabamento do pezinho" },
+  { id: "corte-selagem", name: "Corte + Selagem", price: 120, duration: "90min", description: "Corte com tratamento de selagem" }
 ];
 
 // Barbeiros padrão
