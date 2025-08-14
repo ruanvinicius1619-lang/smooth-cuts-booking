@@ -68,7 +68,23 @@ export const useIdleLogout = (options: UseIdleLogoutOptions = {}) => {
    */
   const performLogout = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
+      // Primeira tentativa: logout normal
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.warn('Erro no logout automático, tentando logout local:', error);
+        
+        // Segunda tentativa: logout apenas local
+        const { error: localError } = await supabase.auth.signOut({ scope: 'local' });
+        
+        if (localError) {
+          console.warn('Erro no logout local, forçando limpeza manual:', localError);
+          
+          // Terceira tentativa: limpeza manual
+          localStorage.removeItem('sb-jheywkeofcttgdgquawm-auth-token');
+          localStorage.removeItem('supabase.auth.token');
+        }
+      }
       
       toast({
         title: "Sessão expirada",
@@ -78,7 +94,9 @@ export const useIdleLogout = (options: UseIdleLogoutOptions = {}) => {
       
       navigate('/auth');
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('Erro ao fazer logout automático, forçando limpeza:', error);
+      localStorage.clear();
+      window.location.href = '/auth';
     }
   }, [navigate, toast]);
 
