@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="180" fill="#f8f9fa" stroke="#fbbf24" stroke-width="8"/>
+  
+  <!-- Barber pole -->
+  <g transform="translate(200, 200)">
+    <!-- Pole base -->
+    <rect x="-15" y="-80" width="30" height="160" fill="#1f2937" rx="15"/>
+    
+    <!-- Pole stripes -->
+    <rect x="-15" y="-80" width="30" height="20" fill="#fbbf24"/>
+    <rect x="-15" y="-40" width="30" height="20" fill="#ffffff"/>
+    <rect x="-15" y="0" width="30" height="20" fill="#fbbf24"/>
+    <rect x="-15" y="40" width="30" height="20" fill="#ffffff"/>
+    
+    <!-- Diagonal stripes -->
+    <path d="M -15,-80 L 15,-60 L 15,-40 L -15,-60 Z" fill="#1f2937"/>
+    <path d="M -15,-40 L 15,-20 L 15,0 L -15,-20 Z" fill="#1f2937"/>
+    <path d="M -15,0 L 15,20 L 15,40 L -15,20 Z" fill="#1f2937"/>
+    <path d="M -15,40 L 15,60 L 15,80 L -15,60 Z" fill="#1f2937"/>
+    
+    <!-- Top cap -->
+    <ellipse cx="0" cy="-80" rx="20" ry="8" fill="#1f2937"/>
+    <ellipse cx="0" cy="-85" rx="18" ry="6" fill="#fbbf24"/>
+    
+    <!-- Bottom cap -->
+    <ellipse cx="0" cy="80" rx="20" ry="8" fill="#1f2937"/>
+    <ellipse cx="0" cy="75" rx="18" ry="6" fill="#fbbf24"/>
+  </g>
+  
+  <!-- Razor on left -->
+  <g transform="translate(120, 200) rotate(-30)">
+    <rect x="-40" y="-3" width="80" height="6" fill="#9ca3af" rx="3"/>
+    <rect x="-45" y="-8" width="15" height="16" fill="#8b4513" rx="2"/>
+    <circle cx="-37" cy="0" r="2" fill="#fbbf24"/>
+  </g>
+  
+  <!-- Scissors on right -->
+  <g transform="translate(280, 200) rotate(30)">
+    <!-- Handle rings -->
+    <circle cx="-25" cy="-8" r="8" fill="none" stroke="#6b7280" stroke-width="2"/>
+    <circle cx="-25" cy="8" r="8" fill="none" stroke="#6b7280" stroke-width="2"/>
+    
+    <!-- Blades -->
+    <path d="M -15,-8 L 25,-2 L 25,2 L -15,-4 Z" fill="#9ca3af"/>
+    <path d="M -15,8 L 25,2 L 25,6 L -15,12 Z" fill="#9ca3af"/>
+    
+    <!-- Pivot -->
+    <circle cx="-15" cy="0" r="3" fill="#6b7280"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="200" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1f2937">BARBERSHOP</text>
+  <text x="200" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1f2937">APP</text>
+</svg>

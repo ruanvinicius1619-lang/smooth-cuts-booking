@@ -91,12 +91,12 @@ const Header = ({
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/")}>
-            <div className="w-10 h-10 bg-gradient-gold rounded-lg flex items-center justify-center">
-              <Scissors className="w-6 h-6 text-barbershop-black" />
+            <div className="w-12 h-12 flex items-center justify-center">
+              <img src="/barbershop-logo.svg" alt="Barbershop Logo" className="w-12 h-12" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-foreground">Mateus BarberShop</span>
-              <span className="text-sm text-barbershop-gray font-medium">Mateus BarberShop</span>
+              <span className="font-bold text-xl text-foreground">Mateus Barbershop</span>
+              <span className="text-sm text-barbershop-gray font-medium">Barbearia Premium</span>
             </div>
           </div>
 

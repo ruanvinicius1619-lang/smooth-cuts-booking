@@ -72,7 +72,7 @@ const Auth = () => {
         } else {
           toast({
             title: "Login realizado com sucesso!",
-            description: "Bem-vindo de volta à Smooth Cuts",
+            description: "Bem-vindo de volta à Mateus Barbershop",
           });
         }
       } else {
@@ -138,7 +138,7 @@ const Auth = () => {
             <p className="text-barbershop-gray">
               {isLogin 
                 ? "Acesse sua conta para agendar serviços" 
-                : "Junte-se à família Smooth Cuts"
+                : "Junte-se à família Mateus Barbershop"
               }
             </p>
           </CardHeader>

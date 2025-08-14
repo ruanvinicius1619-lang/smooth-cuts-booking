@@ -8,7 +8,9 @@ const Footer = () => {
             <h3 className="text-xl font-bold text-accent">Mateus BarberShop</h3>
             <p className="text-barbershop-gray-light">A barbearia premium que combina tradição e modernidade para oferecer a melhor experiência em cuidados masculinos.</p>
             <div className="flex space-x-4">
-              <Instagram className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
+              <a href="https://instagram.com/mateusbarbershop99_" target="_blank" rel="noopener noreferrer">
+                <Instagram className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
+              </a>
               <MessageCircle className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
             </div>
           </div>
@@ -51,10 +53,10 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-accent">Serviços</h4>
             <ul className="space-y-2">
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte Tradicional</li>
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Barba & Bigode</li>
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Tratamentos Capilares</li>
-              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Relaxamento</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte + Pigmentação</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte + Barba</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte + Selagem</li>
+              <li className="text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth">Corte Degradê</li>
             </ul>
           </div>
         </div>

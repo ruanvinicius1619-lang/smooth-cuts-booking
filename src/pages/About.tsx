@@ -62,7 +62,7 @@ const About = () => {
                 <div>
                   <h2 className="text-3xl font-bold text-foreground mb-6">Mateus Barbershop</h2>
                   <p className="text-muted-foreground mb-6">
-                    Fundada em 2009, a Smooth Cuts nasceu da paixão por oferecer 
+                    Fundada em 2009, a Mateus Barbershop nasceu da paixão por oferecer 
                     um serviço de excelência no cuidado masculino. Nossa missão é 
                     proporcionar uma experiência única, combinando técnicas tradicionais 
                     com as mais modernas tendências.

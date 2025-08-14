@@ -1,39 +1,77 @@
-# Welcome to your Lovable project
+# 🪒 Smooth Cuts Booking - Sistema de Agendamento para Barbearia
 
-## Project info
+Sistema completo de agendamento online para barbearias, desenvolvido com React, TypeScript e Supabase.
 
-**URL**: https://lovable.dev/projects/3dceb11f-473b-4ba4-985f-064fb293409d
+## 🚀 Inicialização Rápida (Windows)
 
-## How can I edit this code?
+### Método 1: Script Automático (Recomendado)
+```powershell
+# Execute o script de inicialização automática
+.\inicializar.ps1
+```
 
-There are several ways of editing your application.
+### Método 2: Manual
+1. **Instale o Node.js**: https://nodejs.org/ (versão LTS)
+2. **Instale dependências**: `npm install`
+3. **Configure Supabase**: Veja `GUIA_INICIALIZACAO.md`
+4. **Inicie aplicação**: `npm run dev`
 
-**Use Lovable**
+## 📋 Pré-requisitos
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3dceb11f-473b-4ba4-985f-064fb293409d) and start prompting.
+- **Node.js** (versão 18 ou superior)
+- **npm** (incluído com Node.js)
+- **Conta Supabase** (gratuita)
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🔧 Configuração Detalhada
 
-**Use your preferred IDE**
+Para instruções completas de configuração, consulte:
+- 📖 **[GUIA_INICIALIZACAO.md](./GUIA_INICIALIZACAO.md)** - Guia completo passo a passo
+- 🤖 **[SETUP_AUTOMATED.md](./SETUP_AUTOMATED.md)** - Setup automatizado do banco
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠️ Scripts Disponíveis
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```powershell
+npm run dev              # Iniciar servidor de desenvolvimento
+npm run build            # Gerar build de produção
+npm run setup-db         # Configurar banco de dados Supabase
+npm run preview          # Visualizar build de produção
+npm run lint             # Verificar código
+node scripts/check-prerequisites.js  # Verificar pré-requisitos
+```
 
-Follow these steps:
+## 🌐 Acesso à Aplicação
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Após executar `npm run dev`:
+- **Local**: http://localhost:5173
+- **Rede**: http://192.168.x.x:5173
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🎯 Funcionalidades
 
-# Step 3: Install the necessary dependencies.
-npm i
+- ✅ **Agendamento Online** - Clientes podem agendar serviços
+- 👨‍💼 **Gestão de Barbeiros** - Cadastro e gerenciamento de profissionais
+- 💰 **Catálogo de Serviços** - Lista de serviços com preços
+- 🔐 **Autenticação** - Sistema de login/registro
+- 📊 **Dashboard** - Painel de controle para agendamentos
+- 📱 **Responsivo** - Interface adaptada para mobile
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## 🏗️ Tecnologias
+
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI**: Tailwind CSS + Radix UI + shadcn/ui
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Formulários**: React Hook Form + Zod
+- **Estado**: TanStack Query
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── pages/           # Páginas da aplicação
+├── components/      # Componentes reutilizáveis
+├── integrations/    # Configurações do Supabase
+├── hooks/           # Hooks customizados
+├── lib/             # Utilitários
+└── assets/          # Imagens e recursos
 ```
 
 **Edit a file directly in GitHub**

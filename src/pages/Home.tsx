@@ -5,9 +5,10 @@ import Footer from "@/components/Footer";
 import { Calendar, Star, Scissors, Clock, Award, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/barbershop-hero.jpg";
-import barberService from "@/assets/barber-service.jpg";
+import cortePigmentacao from "@/assets/corte+pigmentaçao.jpeg";
+import corteBarba from "@/assets/corte+barba.jpeg";
 import hairStyling from "@/assets/hair-styling.jpg";
-import beardGrooming from "@/assets/beard-grooming.jpg";
+import barberService from "@/assets/barber-service.jpg";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -15,25 +16,25 @@ const Home = () => {
   const services = [
     {
       id: 1,
-      title: "Corte Tradicional",
-      description: "Corte clássico com acabamento profissional",
-      price: "R$ 35",
-      image: barberService,
+      title: "Corte + Pigmentação",
+      description: "Corte moderno com pigmentação profissional",
+      price: "R$ 45",
+      image: cortePigmentacao,
       icon: Scissors
     },
     {
       id: 2,
       title: "Corte + Barba",
-      description: "Pacote completo com corte e barba",
+      description: "Combo completo com corte e barba modelada",
       price: "R$ 50",
-      image: beardGrooming,
+      image: corteBarba,
       icon: Award
     },
     {
       id: 3,
-      title: "Tratamentos",
-      description: "Cuidados especiais para cabelo e couro cabeludo",
-      price: "R$ 45",
+      title: "Corte + Selagem",
+      description: "Corte com tratamento de selagem premium",
+      price: "R$ 120",
       image: hairStyling,
       icon: Star
     }

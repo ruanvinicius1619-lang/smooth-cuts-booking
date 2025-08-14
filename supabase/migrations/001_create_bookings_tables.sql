@@ -76,11 +76,16 @@ CREATE POLICY "Users can delete their own bookings" ON public.bookings
 
 -- Insert default services
 INSERT INTO public.services (name, description, price, duration_minutes) VALUES
-  ('Corte de Cabelo', 'Corte moderno e estiloso', 35.00, 45),
-  ('Barba Completa', 'Aparar e modelar a barba', 25.00, 30),
-  ('Corte + Barba', 'Combo completo de corte e barba', 55.00, 60),
-  ('Design de Sobrancelha', 'Modelagem e design de sobrancelhas', 15.00, 20),
-  ('Tratamento Premium', 'Tratamento completo com produtos premium', 85.00, 90)
+  ('Corte + Pigmentação', 'Corte de cabelo com pigmentação', 45.00, 50),
+  ('Corte + Barba', 'Combo completo de corte e barba', 50.00, 40),
+  ('Corte + Sobrancelhas', 'Corte de cabelo com design de sobrancelhas', 60.00, 50),
+  ('Corte + Barba + Sobrancelhas', 'Combo completo com todos os serviços', 60.00, 60),
+  ('Corte na Tesoura', 'Corte tradicional feito na tesoura', 45.00, 35),
+  ('Corte Degradê', 'Corte moderno com degradê', 40.00, 30),
+  ('Corte Navalhado', 'Corte com acabamento na navalha', 40.00, 30),
+  ('Barba', 'Aparar e modelar a barba', 25.00, 20),
+  ('Contorno Pezinho', 'Contorno e acabamento do pezinho', 20.00, 15),
+  ('Corte + Selagem', 'Corte com tratamento de selagem', 120.00, 90)
 ON CONFLICT DO NOTHING;
 
 -- Insert default barbers

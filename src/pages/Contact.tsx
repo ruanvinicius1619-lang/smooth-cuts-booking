@@ -163,28 +163,27 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Endereço",
-      content: "Rua das Flores, 123 - Centro\nSão Paulo, SP - 01234-567"
+      content: "Rua São Gonçalo, nº 36\nBairro Santos Dumont"
     },
     {
       icon: Phone,
       title: "Telefone",
-      content: "(11) 9999-8888\n(11) 3333-4444"
+      content: "(79) 99646-5615"
     },
     {
       icon: Mail,
       title: "E-mail",
-      content: "contato@smoothcuts.com.br\nagendamento@smoothcuts.com.br"
+      content: "barberprime01@gmail.com"
     },
     {
       icon: Clock,
       title: "Horário de Funcionamento",
-      content: "Segunda a Sexta: 8h às 20h\nSábado: 8h às 18h\nDomingo: Fechado"
+      content: "Ter-Qui: 9h às 12h-14h às 20h\nSex-Sáb: 9h às 12h-14h às 21h\nDom e Seg: Fechado"
     }
   ];
 
   const socialMedia = [
-    { icon: Instagram, name: "Instagram", handle: "@smoothcuts_oficial" },
-    { icon: Facebook, name: "Facebook", handle: "Smooth Cuts Barbearia" }
+    { icon: Instagram, name: "Instagram", handle: "@mateusbarbershop99_" }
   ];
 
   return (
