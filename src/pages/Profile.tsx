@@ -178,8 +178,6 @@ const Profile = () => {
           phone: session.user.user_metadata?.phone || ""
         });
         
-        // Load bookings after user is set
-        await loadBookings();
       } catch (error) {
         console.error("Error fetching user:", error);
         toast({
@@ -194,6 +192,13 @@ const Profile = () => {
 
     getUser();
   }, [navigate, toast]);
+
+  // Load bookings when user changes
+  useEffect(() => {
+    if (user?.id) {
+      loadBookings();
+    }
+  }, [user]);
 
   const handleSave = async () => {
     if (!user) return;
