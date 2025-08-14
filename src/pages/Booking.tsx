@@ -59,27 +59,48 @@ const Booking = () => {
     "17:00", "17:30", "18:00", "18:30"
   ];
 
-  // Filter available time slots based on selected date and current time
+  // Get all existing bookings to check for conflicts
+  const getAllBookings = () => {
+    const allBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+    return allBookings.filter((booking: any) => 
+      booking.status === 'pending' || booking.status === 'scheduled'
+    );
+  };
+
+  // Filter available time slots based on selected date, current time, and existing bookings
   const getAvailableTimeSlots = useMemo(() => {
-    if (!selectedDate) return allTimeSlots;
+    if (!selectedDate || !selectedBarber) return allTimeSlots;
     
     const today = new Date();
     const isToday = selectedDate.toDateString() === today.toDateString();
+    const selectedDateStr = selectedDate.toISOString().split('T')[0];
     
-    if (!isToday) {
-      return allTimeSlots;
+    // Get all existing bookings for the selected date and barber
+    const existingBookings = getAllBookings();
+    const conflictingBookings = existingBookings.filter((booking: any) => 
+      booking.barber_id === selectedBarber && 
+      booking.booking_date === selectedDateStr
+    );
+    
+    // Get occupied time slots
+    const occupiedTimes = conflictingBookings.map((booking: any) => booking.booking_time);
+    
+    let availableSlots = allTimeSlots.filter(timeSlot => !occupiedTimes.includes(timeSlot));
+    
+    // If it's today, also filter out past time slots
+    if (isToday) {
+      const currentTime = today.getHours() * 60 + today.getMinutes();
+      
+      availableSlots = availableSlots.filter(timeSlot => {
+        const [hours, minutes] = timeSlot.split(':').map(Number);
+        const slotTime = hours * 60 + minutes;
+        // Add 30 minutes buffer to allow booking
+        return slotTime > currentTime + 30;
+      });
     }
     
-    // If it's today, filter out past time slots
-    const currentTime = today.getHours() * 60 + today.getMinutes();
-    
-    return allTimeSlots.filter(timeSlot => {
-      const [hours, minutes] = timeSlot.split(':').map(Number);
-      const slotTime = hours * 60 + minutes;
-      // Add 30 minutes buffer to allow booking
-      return slotTime > currentTime + 30;
-    });
-  }, [selectedDate]);
+    return availableSlots;
+  }, [selectedDate, selectedBarber]);
 
   const timeSlots = getAvailableTimeSlots;
 
@@ -135,11 +156,32 @@ const Booking = () => {
         throw new Error('Serviço não encontrado');
       }
       
+      const bookingDate = selectedDate.toISOString().split('T')[0];
+      
+      // CRITICAL: Check for booking conflicts before creating
+      const existingBookings = getAllBookings();
+      const hasConflict = existingBookings.some((booking: any) => 
+        booking.barber_id === selectedBarber && 
+        booking.booking_date === bookingDate && 
+        booking.booking_time === selectedTime
+      );
+      
+      if (hasConflict) {
+        const barberName = barbers.find(b => b.id === selectedBarber)?.name || 'Barbeiro';
+        toast({
+          title: "Horário não disponível",
+          description: `Este horário já está ocupado com ${barberName}. Por favor, escolha outro horário.`,
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+      
       const bookingData = {
         user_id: user.id,
         service_id: selectedService,
         barber_id: selectedBarber,
-        booking_date: selectedDate.toISOString().split('T')[0],
+        booking_date: bookingDate,
         booking_time: selectedTime,
         status: 'pending',
         notes: null
@@ -159,9 +201,9 @@ const Booking = () => {
       };
       
       // Store booking in localStorage
-      const existingBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
-      existingBookings.push(localBooking);
-      localStorage.setItem('userBookings', JSON.stringify(existingBookings));
+      const allBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+      allBookings.push(localBooking);
+      localStorage.setItem('userBookings', JSON.stringify(allBookings));
       
       console.log('DEBUG: Agendamento criado localmente:', localBooking);
       
@@ -346,20 +388,38 @@ const Booking = () => {
                         <div>
                           <h3 className="font-medium text-foreground mb-4">
                             Horários Disponíveis
+                            {selectedBarber && selectedDate && (
+                              <span className="text-sm text-muted-foreground ml-2">
+                                ({timeSlots.length} horários livres)
+                              </span>
+                            )}
                           </h3>
-                          <div className="grid grid-cols-3 gap-2">
-                            {timeSlots.map((time) => (
-                              <Button
-                                key={time}
-                                variant={selectedTime === time ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setSelectedTime(time)}
-                                className="justify-center"
-                              >
-                                {time}
-                              </Button>
-                            ))}
-                          </div>
+                          {!selectedBarber ? (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p>Selecione um profissional para ver os horários disponíveis</p>
+                            </div>
+                          ) : timeSlots.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p>Nenhum horário disponível para esta data</p>
+                              <p className="text-sm mt-1">Tente selecionar outra data</p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-3 gap-2">
+                              {timeSlots.map((time) => (
+                                <Button
+                                  key={time}
+                                  variant={selectedTime === time ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => setSelectedTime(time)}
+                                  className="justify-center"
+                                >
+                                  {time}
+                                </Button>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
