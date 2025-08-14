@@ -41,10 +41,10 @@ const Home = () => {
   ];
 
   const stats = [
-    { icon: Users, label: "Clientes Satisfeitos", value: "2.500+" },
+    { icon: Users, label: "Clientes Satisfeitos", value: "1.500+" },
     { icon: Star, label: "Avaliação Média", value: "4.9/5" },
-    { icon: Award, label: "Anos de Experiência", value: "15+" },
-    { icon: Clock, label: "Horários Disponíveis", value: "12h/dia" }
+    { icon: Award, label: "Anos de Experiência", value: "9" },
+    { icon: Clock, label: "Horários Disponíveis", value: "10h/dia" }
   ];
 
   return (
@@ -177,7 +177,7 @@ const Home = () => {
                 Tradição e <span className="text-accent">Modernidade</span>
               </h2>
               <p className="text-xl text-barbershop-gray-light mb-6">
-                Há mais de 15 anos oferecendo o melhor em cuidados masculinos. Nossa equipe é formada por profissionais experientes e apaixonados pela arte da barbearia.
+                Há mais de 9 anos oferecendo o melhor em cuidados masculinos. Nossa equipe é formada por profissionais experientes e apaixonados pela arte da barbearia.
               </p>
               <p className="text-lg text-barbershop-gray-light mb-8">
                 Combinamos técnicas tradicionais com equipamentos modernos para garantir a melhor experiência para nossos clientes.

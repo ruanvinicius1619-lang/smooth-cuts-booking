@@ -178,7 +178,7 @@ const Contact = () => {
     {
       icon: Clock,
       title: "Horário de Funcionamento",
-      content: "Ter-Qui: 9h às 12h-14h às 20h\nSex-Sáb: 9h às 12h-14h às 21h\nDom e Seg: Fechado"
+      content: "Ter-Qui: 9h às 12h-13h às 17h\nSex-Sáb: 9h às 12h-13h às 17h\nDom e Seg: Fechado"
     }
   ];
 
