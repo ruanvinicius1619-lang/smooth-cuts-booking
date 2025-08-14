@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -124,11 +124,42 @@ const Booking = () => {
     loadData();
   }, [toast]);
 
-  const timeSlots = [
+  const allTimeSlots = [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
     "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
     "17:00", "17:30", "18:00", "18:30"
   ];
+
+  // Filter available time slots based on selected date and current time
+  const getAvailableTimeSlots = useMemo(() => {
+    if (!selectedDate) return allTimeSlots;
+    
+    const today = new Date();
+    const isToday = selectedDate.toDateString() === today.toDateString();
+    
+    if (!isToday) {
+      return allTimeSlots;
+    }
+    
+    // If it's today, filter out past time slots
+    const currentTime = today.getHours() * 60 + today.getMinutes();
+    
+    return allTimeSlots.filter(timeSlot => {
+      const [hours, minutes] = timeSlot.split(':').map(Number);
+      const slotTime = hours * 60 + minutes;
+      // Add 30 minutes buffer to allow booking
+      return slotTime > currentTime + 30;
+    });
+  }, [selectedDate]);
+
+  const timeSlots = getAvailableTimeSlots;
+
+  // Clear selected time if it's no longer available
+  useEffect(() => {
+    if (selectedTime && !timeSlots.includes(selectedTime)) {
+      setSelectedTime(null);
+    }
+  }, [timeSlots, selectedTime]);
 
   const handleNextStep = () => {
     if (currentStep < 4) {
