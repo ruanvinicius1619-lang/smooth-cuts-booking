@@ -66,8 +66,8 @@ const Header = ({
         
         if (localError) {
           // Terceira tentativa: limpeza manual
-          localStorage.removeItem('sb-jheywkeofcttgdgquawm-auth-token');
-          localStorage.removeItem('supabase.auth.token');
+          sessionStorage.removeItem('sb-jheywkeofcttgdgquawm-auth-token');
+          sessionStorage.removeItem('supabase.auth.token');
           
           // Força atualização do estado
           window.location.reload();
@@ -78,7 +78,7 @@ const Header = ({
       navigate("/");
     } catch (error) {
       // Fallback final: limpeza manual e reload
-      localStorage.clear();
+      sessionStorage.clear();
       window.location.href = '/';
     }
   };

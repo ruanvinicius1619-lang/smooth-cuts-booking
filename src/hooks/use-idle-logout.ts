@@ -77,8 +77,8 @@ export const useIdleLogout = (options: UseIdleLogoutOptions = {}) => {
         
         if (localError) {
           // Terceira tentativa: limpeza manual
-          localStorage.removeItem('sb-jheywkeofcttgdgquawm-auth-token');
-          localStorage.removeItem('supabase.auth.token');
+          sessionStorage.removeItem('sb-jheywkeofcttgdgquawm-auth-token');
+          sessionStorage.removeItem('supabase.auth.token');
         }
       }
       
@@ -90,7 +90,7 @@ export const useIdleLogout = (options: UseIdleLogoutOptions = {}) => {
       
       navigate('/auth');
     } catch (error) {
-      localStorage.clear();
+      sessionStorage.clear();
       window.location.href = '/auth';
     }
   }, [navigate, toast]);
