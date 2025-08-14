@@ -68,7 +68,7 @@ const Header = ({
           {/* Logo */}
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/")}>
             <div className="w-12 h-12 flex items-center justify-center">
-              <img src="/src/assets/barbershop-logo.svg" alt="Barbershop Logo" className="w-12 h-12" />
+              <img src="/barbershop-logo.svg" alt="Barbershop Logo" className="w-12 h-12" />
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-xl text-foreground">Mateus BarberShop</span>
