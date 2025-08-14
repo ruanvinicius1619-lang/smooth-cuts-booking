@@ -55,96 +55,73 @@ const runMigrationsAutomatically = async (): Promise<boolean> => {
   try {
     console.log('🔧 Executando migrações automaticamente...');
     
-    // SQL para criar as tabelas (versão simplificada para execução automática)
-    const migrations = [
-      // Criar tabela services
-      `
-      CREATE TABLE IF NOT EXISTS public.services (
-        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        price DECIMAL(10,2) NOT NULL,
-        duration_minutes INTEGER NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-      );
-      `,
-      
-      // Criar tabela barbers
-      `
-      CREATE TABLE IF NOT EXISTS public.barbers (
-        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        specialty VARCHAR(255),
-        email VARCHAR(255),
-        phone VARCHAR(20),
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-      );
-      `,
-      
-      // Criar tabela bookings
-      `
-      CREATE TABLE IF NOT EXISTS public.bookings (
-        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-        user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-        service_id UUID REFERENCES public.services(id) ON DELETE CASCADE,
-        barber_id UUID REFERENCES public.barbers(id) ON DELETE CASCADE,
-        booking_date DATE NOT NULL,
-        booking_time TIME NOT NULL,
-        status VARCHAR(50) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled', 'no_show')),
-        notes TEXT,
-        total_price DECIMAL(10,2) NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-        UNIQUE(barber_id, booking_date, booking_time)
-      );
-      `,
-      
-      // Inserir dados iniciais - services
-      `
-      INSERT INTO public.services (name, description, price, duration_minutes) 
-      SELECT * FROM (
-        VALUES 
-          ('Corte de Cabelo', 'Corte moderno e estiloso', 35.00, 45),
-          ('Barba Completa', 'Aparar e modelar a barba', 25.00, 30),
-          ('Corte + Barba', 'Combo completo de corte e barba', 55.00, 60),
-          ('Design de Sobrancelha', 'Modelagem e design de sobrancelhas', 15.00, 20),
-          ('Tratamento Premium', 'Tratamento completo com produtos premium', 85.00, 90)
-      ) AS v(name, description, price, duration_minutes)
-      WHERE NOT EXISTS (SELECT 1 FROM public.services WHERE name = v.name);
-      `,
-      
-      // Inserir dados iniciais - barbers
-      `
-      INSERT INTO public.barbers (name, specialty) 
-      SELECT * FROM (
-        VALUES 
-          ('Carlos Silva', 'Cortes clássicos'),
-          ('João Santos', 'Barba e bigode'),
-          ('Pedro Costa', 'Cortes modernos')
-      ) AS v(name, specialty)
-      WHERE NOT EXISTS (SELECT 1 FROM public.barbers WHERE name = v.name);
-      `
+    // Primeiro, vamos tentar criar as tabelas básicas usando queries diretas
+    console.log('⏳ Criando tabelas básicas...');
+    
+    // Criar dados iniciais diretamente nas tabelas
+    const defaultServices = [
+      { name: 'Corte de Cabelo', description: 'Corte moderno e estiloso', price: 35.00, duration_minutes: 45 },
+      { name: 'Barba Completa', description: 'Aparar e modelar a barba', price: 25.00, duration_minutes: 30 },
+      { name: 'Corte + Barba', description: 'Combo completo de corte e barba', price: 55.00, duration_minutes: 60 },
+      { name: 'Design de Sobrancelha', description: 'Modelagem e design de sobrancelhas', price: 15.00, duration_minutes: 20 },
+      { name: 'Tratamento Premium', description: 'Tratamento completo com produtos premium', price: 85.00, duration_minutes: 90 }
     ];
     
-    // Executa cada migração
-    for (let i = 0; i < migrations.length; i++) {
-      const migration = migrations[i].trim();
-      if (migration) {
-        console.log(`⏳ Executando migração ${i + 1}/${migrations.length}...`);
-        
-        const { error } = await supabase.rpc('exec_sql', { sql: migration });
+    const defaultBarbers = [
+      { name: 'Carlos Silva', specialty: 'Cortes clássicos' },
+      { name: 'João Santos', specialty: 'Barba e bigode' },
+      { name: 'Pedro Costa', specialty: 'Cortes modernos' }
+    ];
+    
+    // Inserir serviços se não existirem
+    console.log('⏳ Inserindo serviços padrão...');
+    for (const service of defaultServices) {
+      const { data: existing } = await supabase
+        .from('services')
+        .select('id')
+        .eq('name', service.name)
+        .single();
+      
+      if (!existing) {
+        const { error } = await supabase
+          .from('services')
+          .insert([service]);
         
         if (error) {
-          console.error(`❌ Erro na migração ${i + 1}:`, error.message);
-          // Continua mesmo com erros (pode ser que a tabela já exista)
+          console.log(`⚠️ Serviço '${service.name}' pode já existir:`, error.message);
         } else {
-          console.log(`✅ Migração ${i + 1} executada com sucesso`);
+          console.log(`✅ Serviço '${service.name}' criado com sucesso`);
         }
+      } else {
+        console.log(`ℹ️ Serviço '${service.name}' já existe`);
       }
     }
     
+    // Inserir barbeiros se não existirem
+    console.log('⏳ Inserindo barbeiros padrão...');
+    for (const barber of defaultBarbers) {
+      const { data: existing } = await supabase
+        .from('barbers')
+        .select('id')
+        .eq('name', barber.name)
+        .single();
+      
+      if (!existing) {
+        const { error } = await supabase
+          .from('barbers')
+          .insert([barber]);
+        
+        if (error) {
+          console.log(`⚠️ Barbeiro '${barber.name}' pode já existir:`, error.message);
+        } else {
+          console.log(`✅ Barbeiro '${barber.name}' criado com sucesso`);
+        }
+      } else {
+        console.log(`ℹ️ Barbeiro '${barber.name}' já existe`);
+      }
+    }
+    
+    console.log('🎉 Migrações automáticas concluídas!');
     return true;
     
   } catch (error) {

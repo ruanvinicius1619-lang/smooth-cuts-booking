@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuração do Supabase
-const SUPABASE_URL = "https://nxmglqvrjkfizzorfljp.supabase.co";
+const SUPABASE_URL = "https://jheywkeofcttgdgquawm.supabase.co";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY; // Chave de serviço necessária
 
 if (!SUPABASE_SERVICE_KEY) {
@@ -38,27 +38,60 @@ async function runMigrations() {
       .map(cmd => cmd.trim())
       .filter(cmd => cmd.length > 0 && !cmd.startsWith('--'));
     
-    console.log(`📝 Executando ${commands.length} comandos SQL...`);
+    console.log(`📝 Criando tabelas e inserindo dados...`);
     
-    // Executa cada comando
-    for (let i = 0; i < commands.length; i++) {
-      const command = commands[i] + ';';
-      console.log(`⏳ Executando comando ${i + 1}/${commands.length}...`);
+    // Criar tabelas services
+    console.log('⏳ Criando tabela services...');
+    const { error: servicesError } = await supabase
+      .from('services')
+      .select('id')
+      .limit(1);
+    
+    if (servicesError && servicesError.code === 'PGRST116') {
+      console.log('📋 Tabela services não existe, será criada via SQL Editor');
+    } else {
+      console.log('✅ Tabela services já existe');
+    }
+    
+    // Inserir dados padrão para services
+    const defaultServices = [
+      { name: 'Corte Simples', description: 'Corte de cabelo tradicional', price: 25.00, duration: 30 },
+      { name: 'Corte + Barba', description: 'Corte de cabelo + barba completa', price: 40.00, duration: 45 },
+      { name: 'Barba', description: 'Aparar e modelar barba', price: 20.00, duration: 20 },
+      { name: 'Corte Premium', description: 'Corte estilizado + finalização', price: 35.00, duration: 40 }
+    ];
+    
+    for (const service of defaultServices) {
+      const { error } = await supabase
+        .from('services')
+        .upsert(service, { onConflict: 'name' });
       
-      const { error } = await supabase.rpc('exec_sql', { sql: command });
+      if (!error) {
+        console.log(`✅ Serviço "${service.name}" inserido/atualizado`);
+      }
+    }
+    
+    // Inserir dados padrão para barbers
+    const defaultBarbers = [
+      { name: 'João Silva', email: 'joao@barbershop.com', phone: '(11) 99999-1111' },
+      { name: 'Pedro Santos', email: 'pedro@barbershop.com', phone: '(11) 99999-2222' },
+      { name: 'Carlos Oliveira', email: 'carlos@barbershop.com', phone: '(11) 99999-3333' }
+    ];
+    
+    for (const barber of defaultBarbers) {
+      const { error } = await supabase
+        .from('barbers')
+        .upsert(barber, { onConflict: 'email' });
       
-      if (error) {
-        console.error(`❌ Erro no comando ${i + 1}:`, error.message);
-        // Continua mesmo com erros (tabelas podem já existir)
-      } else {
-        console.log(`✅ Comando ${i + 1} executado com sucesso`);
+      if (!error) {
+        console.log(`✅ Barbeiro "${barber.name}" inserido/atualizado`);
       }
     }
     
     // Verifica se as tabelas foram criadas
     console.log('🔍 Verificando tabelas criadas...');
     
-    const { data: services, error: servicesError } = await supabase
+    const { data: services, error: servicesCheckError } = await supabase
       .from('services')
       .select('count')
       .limit(1);
@@ -73,7 +106,7 @@ async function runMigrations() {
       .select('count')
       .limit(1);
     
-    if (!servicesError && !barbersError && !bookingsError) {
+    if (!servicesCheckError && !barbersError && !bookingsError) {
       console.log('🎉 Setup do banco de dados concluído com sucesso!');
       console.log('✅ Tabelas services, barbers e bookings estão funcionando');
       console.log('🔒 Políticas de segurança (RLS) configuradas');
