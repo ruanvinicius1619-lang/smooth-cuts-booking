@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Instagram } from "lucide-react";
 
 const Contact = () => {
   const contactInfo = [
@@ -31,8 +31,7 @@ const Contact = () => {
   ];
 
   const socialMedia = [
-    { icon: Instagram, name: "Instagram", handle: "@smoothcuts_oficial" },
-    { icon: Facebook, name: "Facebook", handle: "Smooth Cuts Barbearia" }
+    { icon: Instagram, name: "Instagram", handle: "@mateusbarbershop99_" }
   ];
 
   return (
