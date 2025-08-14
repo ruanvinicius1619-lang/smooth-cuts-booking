@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -215,6 +216,3 @@ export const useDatabaseSetup = () => {
   
   return { isReady, isLoading, error };
 };
-
-// Adicionar import do React para o hook
-import { useState, useEffect } from 'react';
