@@ -46,6 +46,12 @@ const Contact = () => {
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
       
+      console.log('Configurações EmailJS:', {
+        serviceId: serviceId ? 'Configurado' : 'Não configurado',
+        templateId: templateId ? 'Configurado' : 'Não configurado',
+        publicKey: publicKey ? 'Configurado' : 'Não configurado'
+      });
+      
       // Verifica se as variáveis de ambiente estão configuradas
       if (!serviceId || !templateId || !publicKey) {
         console.warn('EmailJS não configurado. Dados do formulário:', data);
@@ -56,6 +62,9 @@ const Contact = () => {
         // Simula envio para demonstração
         await new Promise(resolve => setTimeout(resolve, 1000));
       } else {
+        // Inicializa EmailJS com a chave pública
+        emailjs.init(publicKey);
+        
         // Envia e-mail real usando EmailJS
         const templateParams = {
           from_name: data.name,
@@ -66,7 +75,10 @@ const Contact = () => {
           to_email: import.meta.env.VITE_CONTACT_EMAIL || 'contato@smoothcuts.com.br'
         };
         
-        await emailjs.send(serviceId, templateId, templateParams, publicKey);
+        console.log('Enviando e-mail com parâmetros:', templateParams);
+        
+        const response = await emailjs.send(serviceId, templateId, templateParams);
+        console.log('E-mail enviado com sucesso:', response);
       }
       
       // Mostra toast de sucesso
