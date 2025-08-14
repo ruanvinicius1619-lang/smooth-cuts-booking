@@ -47,10 +47,10 @@ const Contact = () => {
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
       
       console.log('Configurações EmailJS:', {
-        serviceId: serviceId ? 'Configurado' : 'Não configurado',
-        templateId: templateId ? 'Configurado' : 'Não configurado',
-        publicKey: publicKey ? 'Configurado' : 'Não configurado'
-      });
+            serviceId: serviceId || 'NÃO CONFIGURADO',
+            templateId: templateId || 'NÃO CONFIGURADO',
+            publicKey: publicKey ? publicKey.substring(0, 10) + '...' : 'NÃO CONFIGURADO'
+          });
       
       // Verifica se as variáveis de ambiente estão configuradas
       if (!serviceId || !templateId || !publicKey) {
@@ -125,8 +125,18 @@ const Contact = () => {
           errorMessage = `Erro EmailJS: ${error.text}`;
         } else if ('message' in error && error.message) {
           errorMessage = error.message;
+        } else if ('status' in error) {
+          errorMessage = `Erro HTTP ${error.status}: Verifique as configurações do EmailJS`;
         }
       }
+      
+      // Log adicional para debug
+      console.error('Detalhes completos do erro:', {
+        error,
+        serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        hasPublicKey: !!import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      });
       
       toast.error('Erro ao enviar mensagem', {
         description: errorMessage
