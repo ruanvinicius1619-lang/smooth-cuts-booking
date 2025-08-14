@@ -259,50 +259,33 @@ const Profile = () => {
         throw new Error('Por favor, selecione apenas arquivos de imagem.');
       }
       
-      // Validar tamanho do arquivo (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('A imagem deve ter no máximo 5MB.');
+      // Validar tamanho do arquivo (máximo 2MB para base64)
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error('A imagem deve ter no máximo 2MB.');
       }
       
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-      const filePath = fileName;
+      console.log('Convertendo imagem para base64...');
       
-      // Verificar se o bucket existe, se não, tentar criar
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const avatarBucket = buckets?.find(bucket => bucket.name === 'avatars');
+      // Converter imagem para base64
+      const reader = new FileReader();
       
-      if (!avatarBucket) {
-        const { error: bucketError } = await supabase.storage.createBucket('avatars', {
-          public: true,
-          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'],
-          fileSizeLimit: 5242880 // 5MB
-        });
-        
-        if (bucketError) {
-          console.log('Bucket creation error (may already exist):', bucketError);
-        }
-      }
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          if (reader.result && typeof reader.result === 'string') {
+            resolve(reader.result);
+          } else {
+            reject(new Error('Erro ao converter imagem'));
+          }
+        };
+        reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+        reader.readAsDataURL(file);
+      });
       
-      // Upload da imagem para o Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-      
-      if (uploadError) {
-        throw uploadError;
-      }
-      
-      // Obter URL pública da imagem
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const base64Data = await base64Promise;
+      console.log('Imagem convertida com sucesso');
       
       // Atualizar o estado local
-      setFormData(prev => ({ ...prev, avatar_url: data.publicUrl }));
+      setFormData(prev => ({ ...prev, avatar_url: base64Data }));
       
       toast({
         title: "Sucesso",
