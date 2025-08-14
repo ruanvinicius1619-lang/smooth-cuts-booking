@@ -131,7 +131,7 @@ const ErrorDiagnostic: React.FC<ErrorDiagnosticProps> = ({ onClose }) => {
     const isProduction = import.meta.env.PROD;
     results.push({
       name: 'Ambiente',
-      status: isProduction ? 'warning' : 'info',
+      status: isProduction ? 'warning' : 'warning',
       message: isProduction ? 'Executando em produção' : 'Executando em desenvolvimento',
       details: `NODE_ENV: ${import.meta.env.MODE}`
     });

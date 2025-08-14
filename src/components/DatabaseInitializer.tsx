@@ -14,7 +14,7 @@ interface DatabaseInitializerProps {
  * Deve envolver a aplicação principal para garantir que o banco está configurado
  */
 export const DatabaseInitializer: React.FC<DatabaseInitializerProps> = ({ children }) => {
-  const { isReady, isLoading, error, retrySetup } = useDatabaseSetup();
+  const { isReady, isLoading, error } = useDatabaseSetup();
   const isProduction = import.meta.env.PROD;
   const [showDiagnostic, setShowDiagnostic] = React.useState(false);
 
