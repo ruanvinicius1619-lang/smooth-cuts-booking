@@ -71,8 +71,8 @@ const Header = ({
               <img src="/barbershop-logo.svg" alt="Barbershop Logo" className="w-12 h-12" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-foreground">Mateus BarberShop</span>
-              <span className="text-sm text-barbershop-gray font-medium">Mateus BarberShop</span>
+              <span className="font-bold text-xl text-foreground">Mateus Barbershop</span>
+              <span className="text-sm text-barbershop-gray font-medium">Barbearia Premium</span>
             </div>
           </div>
 

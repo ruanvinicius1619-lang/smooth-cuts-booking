@@ -4,9 +4,15 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Scissors, Award, Star, Clock, Sparkles, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import cortePigmentacao from "@/assets/corte+pigmentaçao.jpeg";
+import corteBarba from "@/assets/corte+barba.jpeg";
+import corteSobrancelha from "@/assets/corte+sobrancelha.jpeg";
+import corteBarbasobrancelha from "@/assets/corte+barba+sobrancelha.jpeg";
+import corteTesoura from "@/assets/corte-na-tesoura.jpeg";
 import barberService from "@/assets/barber-service.jpg";
+import corteNavalhado from "@/assets/corte navalhado.jpeg";
+import barba from "@/assets/barba.jpeg";
 import hairStyling from "@/assets/hair-styling.jpg";
-import beardGrooming from "@/assets/beard-grooming.jpg";
 const Services = () => {
   const navigate = useNavigate();
   const services = [{
@@ -15,7 +21,7 @@ const Services = () => {
     description: "Corte moderno com pigmentação para realçar o visual e cobrir fios grisalhos",
     price: "R$ 45",
     duration: "50 min",
-    image: hairStyling,
+    image: cortePigmentacao,
     icon: Scissors,
     features: ["Corte personalizado", "Pigmentação profissional", "Produtos premium", "Acabamento impecável"]
   }, {
@@ -24,7 +30,7 @@ const Services = () => {
     description: "Combo completo com corte de cabelo e barba modelada para um visual renovado",
     price: "R$ 50",
     duration: "40 min",
-    image: beardGrooming,
+    image: corteBarba,
     icon: Award,
     features: ["Corte estilizado", "Barba modelada", "Óleos nutritivos", "Toalha quente"]
   }, {
@@ -33,7 +39,7 @@ const Services = () => {
     description: "Corte de cabelo com design e modelagem de sobrancelhas para um look completo",
     price: "R$ 60",
     duration: "50 min",
-    image: hairStyling,
+    image: corteSobrancelha,
     icon: Star,
     features: ["Corte profissional", "Design de sobrancelhas", "Acabamento detalhado", "Visual harmonioso"]
   }, {
@@ -42,7 +48,7 @@ const Services = () => {
     description: "Pacote completo com todos os cuidados para um visual impecável",
     price: "R$ 60",
     duration: "60 min",
-    image: barberService,
+    image: corteBarbasobrancelha,
     icon: Sparkles,
     features: ["Serviço completo", "Visual harmonioso", "Acabamento premium", "Resultado garantido"]
   }, {
@@ -51,7 +57,7 @@ const Services = () => {
     description: "Corte tradicional feito exclusivamente na tesoura para um acabamento clássico",
     price: "R$ 45",
     duration: "35 min",
-    image: hairStyling,
+    image: corteTesoura,
     icon: Scissors,
     features: ["Técnica tradicional", "Corte na tesoura", "Acabamento clássico", "Precisão artesanal"]
   }, {
@@ -69,7 +75,7 @@ const Services = () => {
     description: "Corte com acabamento na navalha para um visual mais definido e marcante",
     price: "R$ 40",
     duration: "30 min",
-    image: beardGrooming,
+    image: corteNavalhado,
     icon: Award,
     features: ["Acabamento na navalha", "Visual definido", "Técnica especializada", "Resultado marcante"]
   }, {
@@ -78,7 +84,7 @@ const Services = () => {
     description: "Aparar e modelar a barba com produtos especializados e técnicas profissionais",
     price: "R$ 25",
     duration: "20 min",
-    image: beardGrooming,
+    image: barba,
     icon: Award,
     features: ["Aparar e modelar", "Óleos nutritivos", "Balm hidratante", "Toalha quente"]
   }, {
@@ -172,7 +178,7 @@ const Services = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-foreground mb-4">
-              Por que Escolher a <span className="text-accent"></span>?
+              Por que Escolher a <span className="text-accent">Mateus Barbershop</span>?
             </h2>
             <p className="text-xl text-barbershop-gray max-w-3xl mx-auto">
               Nossa dedicação à excelência nos diferencia das demais barbearias

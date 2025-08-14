@@ -5,9 +5,10 @@ import Footer from "@/components/Footer";
 import { Calendar, Star, Scissors, Clock, Award, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/barbershop-hero.jpg";
-import barberService from "@/assets/barber-service.jpg";
+import cortePigmentacao from "@/assets/corte+pigmentaçao.jpeg";
+import corteBarba from "@/assets/corte+barba.jpeg";
 import hairStyling from "@/assets/hair-styling.jpg";
-import beardGrooming from "@/assets/beard-grooming.jpg";
+import barberService from "@/assets/barber-service.jpg";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const Home = () => {
       title: "Corte + Pigmentação",
       description: "Corte moderno com pigmentação profissional",
       price: "R$ 45",
-      image: hairStyling,
+      image: cortePigmentacao,
       icon: Scissors
     },
     {
@@ -26,7 +27,7 @@ const Home = () => {
       title: "Corte + Barba",
       description: "Combo completo com corte e barba modelada",
       price: "R$ 50",
-      image: beardGrooming,
+      image: corteBarba,
       icon: Award
     },
     {
