@@ -6,7 +6,8 @@ import { Calendar, Star, Scissors, Clock, Award, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/barbershop-hero.jpg";
 import cortePigmentacao from "@/assets/corte+pigmentaçao.jpeg";
-import corteBarba from "@/assets/corte+barba.jpeg";
+import corteBarba from "@/assets/corte +  barba.png";
+import selagemCorte from "@/assets/selagem+corte.jpeg";
 import hairStyling from "@/assets/hair-styling.jpg";
 import barberService from "@/assets/barber-service.jpg";
 
@@ -35,7 +36,7 @@ const Home = () => {
       title: "Corte + Selagem",
       description: "Corte com tratamento de selagem premium",
       price: "R$ 120",
-      image: hairStyling,
+      image: selagemCorte,
       icon: Star
     }
   ];

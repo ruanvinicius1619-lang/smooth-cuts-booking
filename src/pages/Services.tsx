@@ -5,13 +5,16 @@ import Footer from "@/components/Footer";
 import { Scissors, Award, Star, Clock, Sparkles, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import cortePigmentacao from "@/assets/corte+pigmentaçao.jpeg";
-import corteBarba from "@/assets/corte+barba.jpeg";
+import corteBarba from "@/assets/corte +  barba.png";
 import corteSobrancelha from "@/assets/corte+sobrancelha.jpeg";
 import corteBarbasobrancelha from "@/assets/corte+barba+sobrancelha.jpeg";
 import corteTesoura from "@/assets/corte-na-tesoura.jpeg";
+import corteDegrade from "@/assets/corte-degrade.jpeg";
+import corteNavalhado from "@/assets/corte-navalhado.jpeg";
+import contornoPezinho from "@/assets/contorno pezinho.jpeg";
+import selagemCorte from "@/assets/selagem+corte.jpeg";
 import { useAdminData } from "@/hooks/useAdminData";
 import barberService from "@/assets/barber-service.jpg";
-import corteNavalhado from "@/assets/corte navalhado.jpeg";
 import barba from "@/assets/barba.jpeg";
 import hairStyling from "@/assets/hair-styling.jpg";
 const Services = () => {
@@ -20,7 +23,7 @@ const Services = () => {
   
   // Fallback services with images for display
   const servicesWithImages = adminServices.map((service, index) => {
-    const images = [barberService, hairStyling, barba];
+    const images = [cortePigmentacao, corteBarba, corteSobrancelha, corteBarbasobrancelha, corteTesoura, corteDegrade, corteNavalhado, barba, contornoPezinho, selagemCorte];
     const icons = [Scissors, Star, Award, Sparkles, Users];
     
     return {
@@ -88,7 +91,7 @@ const Services = () => {
     description: "Corte moderno com degradê nas laterais para um visual contemporâneo",
     price: "R$ 40",
     duration: "30 min",
-    image: barberService,
+    image: corteDegrade,
     icon: Star,
     features: ["Degradê profissional", "Técnicas modernas", "Visual contemporâneo", "Acabamento preciso"]
   }, {
@@ -115,7 +118,7 @@ const Services = () => {
     description: "Acabamento e contorno do pezinho para um visual sempre alinhado",
     price: "R$ 20",
     duration: "15 min",
-    image: hairStyling,
+    image: contornoPezinho,
     icon: Scissors,
     features: ["Contorno preciso", "Acabamento profissional", "Visual alinhado", "Manutenção rápida"]
   }, {
@@ -124,7 +127,7 @@ const Services = () => {
     description: "Corte com tratamento de selagem para cabelos mais saudáveis e brilhantes",
     price: "R$ 120",
     duration: "90 min",
-    image: hairStyling,
+    image: selagemCorte,
     icon: Sparkles,
     features: ["Corte personalizado", "Tratamento de selagem", "Produtos premium", "Cabelos revitalizados"]
   }];
