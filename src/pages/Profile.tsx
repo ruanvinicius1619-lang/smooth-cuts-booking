@@ -15,7 +15,7 @@ import { ArrowLeft, User, Mail, Calendar, Edit2, Save, X, Clock, Scissors, Check
 import { useToast } from "@/hooks/use-toast";
 
 // Types for bookings
-type BookingStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';
+type BookingStatus = 'pending' | 'scheduled' | 'completed' | 'cancelled' | 'no_show';
 
 interface Booking {
   id: string;
@@ -74,16 +74,16 @@ const Profile = () => {
     
     setBookingsLoading(true);
     try {
-      // Load upcoming bookings (scheduled status and future dates)
+      // Load upcoming bookings
       const { data: upcoming, error: upcomingError } = await supabase
         .from('bookings')
         .select(`
           *,
-          services(name),
+          services(name, price),
           barbers(name)
         `)
         .eq('user_id', user.id)
-        .eq('status', 'scheduled')
+        .eq('status', 'pending')
         .gte('booking_date', new Date().toISOString().split('T')[0])
         .order('booking_date', { ascending: true });
       
@@ -94,7 +94,7 @@ const Profile = () => {
         .from('bookings')
         .select(`
           *,
-          services(name),
+          services(name, price),
           barbers(name)
         `)
         .eq('user_id', user.id)
@@ -111,7 +111,7 @@ const Profile = () => {
         booking_date: booking.booking_date,
         booking_time: booking.booking_time,
         status: booking.status,
-        total_price: parseFloat(booking.total_price),
+        total_price: booking.services?.price || 0,
         created_at: booking.created_at
       });
       

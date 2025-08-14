@@ -32,13 +32,26 @@ const Booking = () => {
   const [services, setServices] = useState<any[]>([]);
   const [barbers, setBarbers] = useState<any[]>([]);
 
+  // Authentication listener
+  useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('DEBUG: Auth state changed:', event, session?.user?.email);
+      setUser(session?.user || null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
+  
   // Load services and barbers from database
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Check authentication
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user || null);
         
         // Load services
         const { data: servicesData, error: servicesError } = await supabase
@@ -121,7 +134,11 @@ const Booking = () => {
   };
 
   const handleConfirmBooking = async () => {
+    console.log('=== DEBUG: Iniciando agendamento ===');
+    console.log('Usuário:', user);
+    
     if (!user) {
+      console.log('DEBUG: Usuário não autenticado');
       toast({
         title: "Login necessário",
         description: "Você precisa fazer login para confirmar o agendamento.",
@@ -149,28 +166,36 @@ const Booking = () => {
         throw new Error('Serviço não encontrado');
       }
       
+      const bookingData = {
+        user_id: user.id,
+        service_id: selectedService,
+        barber_id: selectedBarber,
+        booking_date: selectedDate.toISOString().split('T')[0],
+        booking_time: selectedTime,
+        status: 'pending',
+        notes: null
+      };
+      
+      console.log('DEBUG: Dados do agendamento:', bookingData);
+      
       // Create booking in database
       const { data, error } = await supabase
         .from('bookings')
-        .insert({
-          user_id: user.id,
-          service_id: selectedService,
-          barber_id: selectedBarber,
-          booking_date: selectedDate.toISOString().split('T')[0],
-          booking_time: selectedTime,
-          status: 'scheduled',
-          total_price: selectedServiceData.price,
-          notes: null
-        })
+        .insert(bookingData)
         .select()
         .single();
       
+      console.log('DEBUG: Resultado da inserção:', { data, error });
+      
       if (error) {
+        console.error('DEBUG: Erro na inserção:', error);
         if (error.code === '23505') { // Unique constraint violation
           throw new Error('Este horário já está ocupado. Por favor, escolha outro horário.');
         }
         throw error;
       }
+      
+      console.log('DEBUG: Agendamento criado com sucesso:', data);
       
       toast({
         title: "Agendamento confirmado!",
