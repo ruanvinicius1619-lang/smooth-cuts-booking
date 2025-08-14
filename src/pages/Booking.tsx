@@ -61,7 +61,7 @@ const Booking = () => {
           id: service.id,
           name: service.name,
           price: parseFloat(service.price),
-          duration: `${service.duration_minutes}min`
+          duration: `${service.duration}min`
         })) || [];
         
         // Transform barbers data
@@ -71,7 +71,24 @@ const Booking = () => {
           specialty: barber.specialty || 'Especialista'
         })) || [];
         
-        setServices(transformedServices);
+        // Use database services if we have enough, otherwise use fallback
+        if (transformedServices.length >= 8) {
+          setServices(transformedServices);
+        } else {
+          console.log('Usando serviços de fallback devido à quantidade insuficiente no banco');
+          setServices([
+            { id: "corte-pigmentacao", name: "Corte + Pigmentação", price: 45, duration: "50min" },
+            { id: "corte-barba", name: "Corte + Barba", price: 50, duration: "40min" },
+            { id: "corte-sobrancelhas", name: "Corte + Sobrancelhas", price: 60, duration: "50min" },
+            { id: "corte-barba-sobrancelhas", name: "Corte + Barba + Sobrancelhas", price: 60, duration: "60min" },
+            { id: "corte-tesoura", name: "Corte na Tesoura", price: 45, duration: "35min" },
+            { id: "corte-degrade", name: "Corte Degradê", price: 40, duration: "30min" },
+            { id: "corte-navalhado", name: "Corte Navalhado", price: 40, duration: "30min" },
+            { id: "barba", name: "Barba", price: 25, duration: "20min" },
+            { id: "contorno-pezinho", name: "Contorno Pezinho", price: 20, duration: "15min" },
+            { id: "corte-selagem", name: "Corte + Selagem", price: 120, duration: "90min" }
+          ]);
+        }
         setBarbers(transformedBarbers);
         
       } catch (error) {

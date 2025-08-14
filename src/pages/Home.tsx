@@ -18,7 +18,7 @@ const Home = () => {
       title: "Corte + Pigmentação",
       description: "Corte moderno com pigmentação profissional",
       price: "R$ 45",
-      image: barberService,
+      image: hairStyling,
       icon: Scissors
     },
     {

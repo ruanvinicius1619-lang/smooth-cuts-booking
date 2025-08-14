@@ -15,7 +15,7 @@ const Services = () => {
     description: "Corte moderno com pigmentação para realçar o visual e cobrir fios grisalhos",
     price: "R$ 45",
     duration: "50 min",
-    image: barberService,
+    image: hairStyling,
     icon: Scissors,
     features: ["Corte personalizado", "Pigmentação profissional", "Produtos premium", "Acabamento impecável"]
   }, {
