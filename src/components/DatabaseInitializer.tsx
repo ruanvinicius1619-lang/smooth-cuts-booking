@@ -3,6 +3,7 @@ import { useDatabaseSetup } from '@/utils/database-setup';
 import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import ErrorDiagnostic from '@/components/ErrorDiagnostic';
 
 interface DatabaseInitializerProps {
   children: React.ReactNode;
@@ -13,7 +14,16 @@ interface DatabaseInitializerProps {
  * Deve envolver a aplicação principal para garantir que o banco está configurado
  */
 export const DatabaseInitializer: React.FC<DatabaseInitializerProps> = ({ children }) => {
-  const { isReady, isLoading, error } = useDatabaseSetup();
+  const { isReady, isLoading, error, retrySetup } = useDatabaseSetup();
+  const isProduction = import.meta.env.PROD;
+  const [showDiagnostic, setShowDiagnostic] = React.useState(false);
+
+  // Mostrar diagnóstico automaticamente em produção quando há erro
+  React.useEffect(() => {
+    if (isProduction && error && !isLoading) {
+      setShowDiagnostic(true);
+    }
+  }, [isProduction, error, isLoading]);
 
   // Função para recarregar a página (útil após setup manual)
   const handleRetry = () => {
@@ -71,9 +81,17 @@ export const DatabaseInitializer: React.FC<DatabaseInitializerProps> = ({ childr
           <div className="space-y-3">
             <Button 
               onClick={handleRetry} 
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 mb-2"
             >
               Tentar Novamente
+            </Button>
+            
+            <Button 
+              onClick={() => setShowDiagnostic(true)}
+              variant="outline"
+              className="w-full"
+            >
+              Diagnóstico Avançado
             </Button>
             
             <div className="text-center">
@@ -83,6 +101,10 @@ export const DatabaseInitializer: React.FC<DatabaseInitializerProps> = ({ childr
               </p>
             </div>
           </div>
+          
+          {showDiagnostic && (
+            <ErrorDiagnostic onClose={() => setShowDiagnostic(false)} />
+          )}
         </div>
       </div>
     );
@@ -100,6 +122,9 @@ export const DatabaseInitializer: React.FC<DatabaseInitializerProps> = ({ childr
           </div>
         </div>
         {children}
+        {showDiagnostic && (
+          <ErrorDiagnostic onClose={() => setShowDiagnostic(false)} />
+        )}
       </>
     );
   }

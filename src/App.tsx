@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DatabaseInitializer from "@/components/DatabaseInitializer";
 import IdleLogoutProvider from "@/components/IdleLogoutProvider";
+import DiagnosticFloatingButton from "@/components/DiagnosticFloatingButton";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
 import Auth from "./pages/Auth";
@@ -35,6 +36,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <DiagnosticFloatingButton />
           </IdleLogoutProvider>
         </BrowserRouter>
       </DatabaseInitializer>
