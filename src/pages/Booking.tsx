@@ -53,16 +53,16 @@ const Booking = () => {
   console.log('DEBUG: Services loaded:', services);
   console.log('DEBUG: Barbers loaded:', barbers);
 
-  const allTimeSlots = [
+  const allTimeSlots = useMemo(() => [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
     "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
     "17:00", "17:30", "18:00", "18:30"
-  ];
+  ], []);
 
   // Get all existing bookings to check for conflicts
   const getAllBookings = () => {
     const allBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
-    return allBookings.filter((booking: any) => 
+    return allBookings.filter((booking: { status: string }) =>
       booking.status === 'pending' || booking.status === 'scheduled'
     );
   };
@@ -77,13 +77,13 @@ const Booking = () => {
     
     // Get all existing bookings for the selected date and barber
     const existingBookings = getAllBookings();
-    const conflictingBookings = existingBookings.filter((booking: any) => 
+    const conflictingBookings = existingBookings.filter((booking: { barber_id: string; booking_date: string }) =>
       booking.barber_id === selectedBarber && 
       booking.booking_date === selectedDateStr
     );
     
     // Get occupied time slots
-    const occupiedTimes = conflictingBookings.map((booking: any) => booking.booking_time);
+    const occupiedTimes = conflictingBookings.map((booking: { booking_time: string }) => booking.booking_time);
     
     let availableSlots = allTimeSlots.filter(timeSlot => !occupiedTimes.includes(timeSlot));
     
@@ -100,7 +100,7 @@ const Booking = () => {
     }
     
     return availableSlots;
-  }, [selectedDate, selectedBarber]);
+  }, [selectedDate, selectedBarber, allTimeSlots]);
 
   const timeSlots = getAvailableTimeSlots;
 
@@ -160,7 +160,7 @@ const Booking = () => {
       
       // CRITICAL: Check for booking conflicts before creating
       const existingBookings = getAllBookings();
-      const hasConflict = existingBookings.some((booking: any) => 
+      const hasConflict = existingBookings.some((booking: { barber_id: string; booking_date: string; booking_time: string }) =>
         booking.barber_id === selectedBarber && 
         booking.booking_date === bookingDate && 
         booking.booking_time === selectedTime

@@ -4,13 +4,13 @@
 .whatsapp-button {
   /* Posicionamento fixo no canto inferior direito */
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000; /* Garante que fique acima de outros elementos */
+  bottom: 24px;
+  right: 24px;
+  z-index: 40; /* Menor que o ChatBot (z-50) para não sobrepor */
   
   /* Aparência do botão */
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
   background-color: #25D366; /* Verde oficial do WhatsApp */
   border: none;
   border-radius: 50%; /* Torna o botão redondo */
@@ -45,8 +45,8 @@
 
 /* Ícone do WhatsApp */
 .whatsapp-icon {
-  width: 32px;
-  height: 32px;
+  width: 27px;
+  height: 27px;
   color: white; /* Ícone branco */
   transition: transform 0.3s ease;
 }
@@ -68,33 +68,33 @@
 }
 
 /* Responsividade para dispositivos móveis */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .whatsapp-button {
-    /* Ajusta tamanho e posição para mobile */
-    width: 56px;
-    height: 56px;
-    bottom: 16px;
-    right: 16px;
+    /* Ajusta tamanho e posição para mobile - alinhado com ChatBot */
+    width: 42px;
+    height: 42px;
+    bottom: 12px; /* Alinhado com o ChatBot que usa bottom-3 (12px) */
+    right: 12px;
   }
   
   .whatsapp-icon {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
   }
 }
 
 /* Para telas muito pequenas */
 @media (max-width: 480px) {
   .whatsapp-button {
-    width: 50px;
-    height: 50px;
-    bottom: 12px;
+    width: 41px;
+    height: 41px;
+    bottom: 12px; /* Mantém alinhado horizontalmente com o ChatBot */
     right: 12px;
   }
   
   .whatsapp-icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 }
 

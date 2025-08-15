@@ -33,28 +33,36 @@ export const useErrorDetection = () => {
       setHasUnhandledErrors(true);
     };
 
-    // Capturar erros do console
+    // Capturar erros do console de forma assíncrona para evitar setState durante renderização
     const originalError = console.error;
     const originalWarn = console.warn;
     
     console.error = (...args) => {
-      const errorInfo: ErrorInfo = {
-        message: args.join(' '),
-        timestamp: Date.now()
-      };
-      
-      setErrors(prev => [...prev, errorInfo]);
       originalError.apply(console, args);
+      
+      // Usar setTimeout para evitar setState durante renderização
+      setTimeout(() => {
+        const errorInfo: ErrorInfo = {
+          message: args.join(' '),
+          timestamp: Date.now()
+        };
+        
+        setErrors(prev => [...prev, errorInfo]);
+      }, 0);
     };
 
     console.warn = (...args) => {
-      const errorInfo: ErrorInfo = {
-        message: `Warning: ${args.join(' ')}`,
-        timestamp: Date.now()
-      };
-      
-      setErrors(prev => [...prev, errorInfo]);
       originalWarn.apply(console, args);
+      
+      // Usar setTimeout para evitar setState durante renderização
+      setTimeout(() => {
+        const errorInfo: ErrorInfo = {
+          message: `Warning: ${args.join(' ')}`,
+          timestamp: Date.now()
+        };
+        
+        setErrors(prev => [...prev, errorInfo]);
+      }, 0);
     };
 
     // Adicionar listeners

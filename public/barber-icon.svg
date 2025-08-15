@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Main head shape -->
+  <ellipse cx="256" cy="200" rx="80" ry="100" fill="#F4C2A1" stroke="#000" stroke-width="6"/>
+  
+  <!-- Hair -->
+  <path d="M 196 120 Q 216 80 256 80 Q 296 80 316 120 Q 336 100 356 120 Q 346 140 336 160 Q 316 140 296 150 Q 276 140 256 150 Q 236 140 216 150 Q 196 140 196 120 Z" fill="#D4A574" stroke="#000" stroke-width="4"/>
+  
+  <!-- Eyes -->
+  <rect x="236" y="180" width="12" height="12" fill="#000"/>
+  <rect x="264" y="180" width="12" height="12" fill="#000"/>
+  
+  <!-- Mustache -->
+  <path d="M 216 220 Q 236 210 256 220 Q 276 210 296 220 Q 286 230 276 235 Q 266 240 256 235 Q 246 240 236 235 Q 226 230 216 220 Z" fill="#8B4513" stroke="#000" stroke-width="3"/>
+  
+  <!-- Mouth/Beard area -->
+  <ellipse cx="256" cy="260" rx="40" ry="30" fill="#D4A574" stroke="#000" stroke-width="3"/>
+  
+  <!-- Ears -->
+  <ellipse cx="196" cy="200" rx="15" ry="25" fill="#F4C2A1" stroke="#000" stroke-width="3"/>
+  <ellipse cx="316" cy="200" rx="15" ry="25" fill="#F4C2A1" stroke="#000" stroke-width="3"/>
+  
+  <!-- Bow tie -->
+  <polygon points="236,320 276,320 256,340" fill="#333" stroke="#000" stroke-width="3"/>
+  <rect x="246" y="330" width="20" height="15" fill="#666" stroke="#000" stroke-width="2"/>
+  
+  <!-- Shirt/Apron -->
+  <path d="M 176 360 Q 196 340 256 340 Q 316 340 336 360 L 356 470 Q 336 480 316 480 L 196 480 Q 176 480 156 470 Z" fill="#E6E6E6" stroke="#000" stroke-width="4"/>
+  
+  <!-- Apron straps -->
+  <rect x="216" y="360" width="12" height="120" fill="#999" stroke="#000" stroke-width="2"/>
+  <rect x="284" y="360" width="12" height="120" fill="#999" stroke="#000" stroke-width="2"/>
+  
+  <!-- Apron pocket -->
+  <rect x="226" y="400" width="60" height="40" fill="#FFF" stroke="#000" stroke-width="2" rx="5"/>
+  
+  <!-- Scissors -->
+  <g transform="translate(380, 180)">
+    <!-- Scissors handles -->
+    <ellipse cx="20" cy="80" rx="15" ry="15" fill="#FFF" stroke="#000" stroke-width="3"/>
+    <ellipse cx="60" cy="120" rx="15" ry="15" fill="#FFF" stroke="#000" stroke-width="3"/>
+    
+    <!-- Scissors blades -->
+    <path d="M 20 80 L 40 40 L 50 45 L 30 85 Z" fill="#C0C0C0" stroke="#000" stroke-width="3"/>
+    <path d="M 60 120 L 40 40 L 50 35 L 70 115 Z" fill="#C0C0C0" stroke="#000" stroke-width="3"/>
+    
+    <!-- Scissors pivot -->
+    <circle cx="40" cy="40" r="8" fill="#666" stroke="#000" stroke-width="2"/>
+  </g>
+</svg>
