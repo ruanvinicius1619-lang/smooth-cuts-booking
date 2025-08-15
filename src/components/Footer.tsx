@@ -8,10 +8,9 @@ const Footer = () => {
             <h3 className="text-xl font-bold text-accent">Mateus BarberShop</h3>
             <p className="text-barbershop-gray-light">A barbearia premium que combina tradição e modernidade para oferecer a melhor experiência em cuidados masculinos.</p>
             <div className="flex space-x-4">
-              <a href="https://instagram.com/mateusbarbershop99_" target="_blank" rel="noopener noreferrer">
-                <Instagram className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
+              <a href="https://instagram.com/mateusbarbershop99_" target="_blank" rel="noopener noreferrer" className="text-accent hover:text-barbershop-gray-light transition-smooth">
+                <Instagram className="w-5 h-5" />
               </a>
-              <MessageCircle className="w-5 h-5 text-barbershop-gray-light hover:text-accent cursor-pointer transition-smooth" />
             </div>
           </div>
 
@@ -41,8 +40,8 @@ const Footer = () => {
               <div className="flex items-center space-x-3">
                 <Clock className="w-4 h-4 text-accent" />
                 <div>
-                  <p className="text-barbershop-gray-light">Ter-Qui: 9h às 12h-13h às 17h</p>
-                  <p className="text-barbershop-gray-light">Sex-Sáb: 9h às 12h-13h às 17h</p>
+                  <p className="text-barbershop-gray-light">Ter-Qui: 9h às 12h-14h às 20h</p>
+                  <p className="text-barbershop-gray-light">Sex-Sáb: 9h às 12h-14h às 21h</p>
                   <p className="text-barbershop-gray-light">Dom e Seg: Fechado</p>
                 </div>
               </div>
