@@ -20,7 +20,7 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-accent" />
-                <span className="text-barbershop-gray-light">Rua São Gonçalo, nº 36 – Bairro Santos Dumont</span>
+                <span className="text-barbershop-gray-light">Rua São Gonçalo, nº 36 – Bairro Santos Dumont, Aracaju, SE</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-accent" />
