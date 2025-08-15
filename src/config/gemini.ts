@@ -9,7 +9,7 @@ export const GEMINI_CONFIG = {
   API_KEY: import.meta.env.VITE_GEMINI_API_KEY || '',
   
   // Modelo a ser usado
-  MODEL: 'gemini-pro',
+  MODEL: 'gemini-2.0-flash-exp',
   
   // Configurações de geração
   GENERATION_CONFIG: {

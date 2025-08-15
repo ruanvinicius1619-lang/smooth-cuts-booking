@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Proteção - Barbeiro ID</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .error { color: #d32f2f; }
+        .success { color: #2e7d32; }
+        .warning { color: #f57c00; }
+        button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste de Proteção - Barbeiro ID "barba"</h1>
+        <p>Este teste verifica se o sistema está protegido contra o erro UUID "barba".</p>
+        
+        <div class="test-section">
+            <h3>📊 Status do Sistema</h3>
+            <div id="systemStatus">Verificando...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 Testes de Proteção</h3>
+            <button onclick="testLocalStorage()">Testar localStorage</button>
+            <button onclick="testServiceIds()">Verificar IDs de Serviços</button>
+            <button onclick="testBookings()">Verificar Agendamentos</button>
+            <button onclick="clearInvalidData()">Limpar Dados Inválidos</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Log de Resultados</h3>
+            <div id="testLog" class="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 Ações de Correção</h3>
+            <button onclick="fixBookings()">Corrigir Agendamentos</button>
+            <button onclick="resetBookingState()">Reset Estado de Agendamento</button>
+            <button onclick="validateAllData()">Validar Todos os Dados</button>
+        </div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('testLog');
+        let statusElement = document.getElementById('systemStatus');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            statusElement.innerHTML = `<span class="${className}">${message}</span>`;
+        }
+        
+        function testLocalStorage() {
+            log('=== TESTE: localStorage ===');
+            
+            // Verificar agendamentos
+            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            log(`Agendamentos encontrados: ${bookings.length}`);
+            
+            let invalidCount = 0;
+            bookings.forEach((booking, index) => {
+                if (booking.barber_id === 'barba') {
+                    log(`❌ ERRO: Agendamento ${index + 1} tem barber_id = "barba"`, 'error');
+                    log(`   Detalhes: ${JSON.stringify(booking)}`, 'error');
+                    invalidCount++;
+                }
+            });
+            
+            if (invalidCount === 0) {
+                log('✅ Nenhum agendamento inválido encontrado', 'success');
+            } else {
+                log(`⚠️ ${invalidCount} agendamentos inválidos encontrados`, 'warning');
+            }
+        }
+        
+        function testServiceIds() {
+            log('=== TESTE: IDs de Serviços ===');
+            
+            const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+            log(`Serviços encontrados: ${services.length}`);
+            
+            let hasBarbaService = false;
+            services.forEach(service => {
+                log(`Serviço: ${service.id} - ${service.name}`);
+                if (service.id === 'barba') {
+                    log('⚠️ ATENÇÃO: Existe um serviço com ID "barba"', 'warning');
+                    hasBarbaService = true;
+                }
+            });
+            
+            if (hasBarbaService) {
+                log('🔍 Este pode ser a origem do problema!', 'warning');
+            }
+        }
+        
+        function testBookings() {
+            log('=== TESTE: Validação de Agendamentos ===');
+            
+            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+            const barbers = JSON.parse(localStorage.getItem('adminBarbers') || '[]');
+            
+            log(`Validando ${bookings.length} agendamentos...`);
+            
+            bookings.forEach((booking, index) => {
+                const isServiceId = services.some(s => s.id === booking.barber_id);
+                const isValidBarberId = barbers.some(b => b.id === booking.barber_id);
+                
+                if (isServiceId) {
+                    log(`❌ ERRO: Agendamento ${index + 1} usa ID de serviço como barber_id: ${booking.barber_id}`, 'error');
+                }
+                
+                if (!isValidBarberId && booking.barber_id !== '') {
+                    log(`⚠️ AVISO: Agendamento ${index + 1} tem barber_id inválido: ${booking.barber_id}`, 'warning');
+                }
+            });
+        }
+        
+        function clearInvalidData() {
+            log('=== LIMPEZA: Removendo dados inválidos ===');
+            
+            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            const validBookings = bookings.filter(booking => {
+                if (booking.barber_id === 'barba' || !booking.barber_id || booking.barber_id.trim() === '') {
+                    log(`🧹 Removendo agendamento inválido: ${booking.id}`, 'warning');
+                    return false;
+                }
+                return true;
+            });
+            
+            localStorage.setItem('userBookings', JSON.stringify(validBookings));
+            log(`✅ Limpeza concluída. ${bookings.length - validBookings.length} agendamentos removidos`, 'success');
+        }
+        
+        function fixBookings() {
+            log('=== CORREÇÃO: Corrigindo agendamentos ===');
+            clearInvalidData();
+            log('✅ Agendamentos corrigidos', 'success');
+        }
+        
+        function resetBookingState() {
+            log('=== RESET: Estado de agendamento ===');
+            
+            // Simular reset do estado (não podemos acessar React state diretamente)
+            log('🔄 Para resetar o estado do React, recarregue a página de agendamento', 'warning');
+            log('💡 Ou use as ferramentas de desenvolvedor para limpar o estado', 'info');
+        }
+        
+        function validateAllData() {
+            log('=== VALIDAÇÃO COMPLETA ===');
+            testLocalStorage();
+            testServiceIds();
+            testBookings();
+            log('✅ Validação completa finalizada', 'success');
+        }
+        
+        // Inicialização
+        window.onload = function() {
+            log('🚀 Sistema de teste inicializado');
+            updateStatus('Sistema carregado - Pronto para testes', 'success');
+            
+            // Verificação inicial
+            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            const invalidBookings = bookings.filter(b => b.barber_id === 'barba');
+            
+            if (invalidBookings.length > 0) {
+                updateStatus(`⚠️ ${invalidBookings.length} agendamentos inválidos detectados`, 'warning');
+            } else {
+                updateStatus('✅ Nenhum agendamento inválido detectado', 'success');
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug localStorage</title>
+</head>
+<body>
+    <h1>Debug localStorage - Agendamentos</h1>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        // Verificar agendamentos no localStorage
+        const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+        
+        output.innerHTML = `
+            <h2>Agendamentos encontrados: ${bookings.length}</h2>
+            <pre>${JSON.stringify(bookings, null, 2)}</pre>
+            
+            <h2>Agendamentos com barber_id "barba":</h2>
+        `;
+        
+        const invalidBookings = bookings.filter(booking => booking.barber_id === 'barba');
+        
+        if (invalidBookings.length > 0) {
+            output.innerHTML += `
+                <div style="color: red; font-weight: bold;">
+                    ❌ Encontrados ${invalidBookings.length} agendamentos inválidos:
+                    <pre>${JSON.stringify(invalidBookings, null, 2)}</pre>
+                </div>
+                <button onclick="cleanInvalidBookings()">Limpar agendamentos inválidos</button>
+            `;
+        } else {
+            output.innerHTML += '<div style="color: green;">✅ Nenhum agendamento inválido encontrado</div>';
+        }
+        
+        function cleanInvalidBookings() {
+            const validBookings = bookings.filter(booking => 
+                booking.barber_id !== 'barba' && 
+                booking.barber_id && 
+                booking.barber_id.trim() !== ''
+            );
+            
+            localStorage.setItem('userBookings', JSON.stringify(validBookings));
+            
+            output.innerHTML += `
+                <div style="color: green; margin-top: 10px;">
+                    ✅ Limpeza concluída! Removidos ${bookings.length - validBookings.length} agendamentos inválidos.
+                    <br>Agendamentos restantes: ${validBookings.length}
+                </div>
+            `;
+        }
+        
+        window.cleanInvalidBookings = cleanInvalidBookings;
+    </script>
+</body>
+</html>

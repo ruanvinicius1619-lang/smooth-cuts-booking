@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Reprodução - UUID Barba</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .error { background-color: #fee; border-color: #fcc; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .info { background-color: #e7f3ff; border-color: #b3d9ff; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .danger { background: #dc3545; }
+        .danger:hover { background: #c82333; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .scenario {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste de Reprodução - UUID "barba"</h1>
+        <p>Ferramenta para reproduzir e investigar o erro UUID "barba" de forma controlada.</p>
+        
+        <div class="test-section">
+            <h3>🎯 Cenários de Teste</h3>
+            <div class="scenario">
+                <h4>Cenário 1: Simulação de Agendamento Normal</h4>
+                <button onclick="testNormalBooking()">Testar Agendamento Normal</button>
+                <p>Simula um agendamento com dados válidos</p>
+            </div>
+            
+            <div class="scenario">
+                <h4>Cenário 2: Simulação com ID de Serviço</h4>
+                <button onclick="testServiceIdAsBarber()">Testar ID de Serviço como Barbeiro</button>
+                <p>Simula o erro onde um ID de serviço é usado como barber_id</p>
+            </div>
+            
+            <div class="scenario">
+                <h4>Cenário 3: Dados Corrompidos no localStorage</h4>
+                <button onclick="testCorruptedLocalStorage()">Testar localStorage Corrompido</button>
+                <p>Simula dados corrompidos que podem causar o erro</p>
+            </div>
+            
+            <div class="scenario">
+                <h4>Cenário 4: Mistura de Arrays</h4>
+                <button onclick="testArrayMixing()">Testar Mistura de Arrays</button>
+                <p>Simula confusão entre arrays de serviços e barbeiros</p>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 Ferramentas de Investigação</h3>
+            <button onclick="inspectCurrentState()">Inspecionar Estado Atual</button>
+            <button onclick="simulateBookingFlow()">Simular Fluxo de Agendamento</button>
+            <button onclick="testUUIDValidation()">Testar Validação UUID</button>
+            <button onclick="clearAndReset()">Limpar e Resetar</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Resultados dos Testes</h3>
+            <div id="testResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔍 Estado Atual do Sistema</h3>
+            <div id="systemState"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateSystemState() {
+            const state = document.getElementById('systemState');
+            const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+            const barbers = JSON.parse(localStorage.getItem('adminBarbers') || '[]');
+            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            
+            state.innerHTML = `
+                <h4>📋 Dados Atuais:</h4>
+                <p><strong>Serviços:</strong> ${services.length} (IDs: ${services.map(s => s.id).join(', ')})</p>
+                <p><strong>Barbeiros:</strong> ${barbers.length} (IDs: ${barbers.map(b => b.id).join(', ')})</p>
+                <p><strong>Agendamentos:</strong> ${bookings.length}</p>
+                <p><strong>Serviço 'barba' existe:</strong> ${services.some(s => s.id === 'barba') ? '✅ Sim' : '❌ Não'}</p>
+                <p><strong>Barbeiro 'barba' existe:</strong> ${barbers.some(b => b.id === 'barba') ? '🚨 Sim (PROBLEMA!)' : '✅ Não'}</p>
+            `;
+        }
+
+        function testNormalBooking() {
+            log('=== TESTE: Agendamento Normal ===', 'info');
+            
+            const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+            const barbers = JSON.parse(localStorage.getItem('adminBarbers') || '[]');
+            
+            if (services.length === 0 || barbers.length === 0) {
+                log('❌ Dados insuficientes para teste. Execute a aplicação primeiro.', 'error');
+                return;
+            }
+            
+            const validService = services[0];
+            const validBarber = barbers[0];
+            
+            log(`✅ Serviço selecionado: ${validService.id} - ${validService.name}`);
+            log(`✅ Barbeiro selecionado: ${validBarber.id} - ${validBarber.name}`);
+            
+            // Simular criação de agendamento
+            const bookingData = {
+                id: 'test-' + Date.now(),
+                user_id: 'test-user',
+                service_id: validService.id,
+                barber_id: validBarber.id,
+                booking_date: new Date().toISOString().split('T')[0],
+                booking_time: '10:00',
+                status: 'scheduled'
+            };
+            
+            log('📋 Dados do agendamento simulado:', 'info');
+            log(`<pre>${JSON.stringify(bookingData, null, 2)}</pre>`);
+            
+            // Verificar se seria válido
+            if (isValidUUID(bookingData.barber_id)) {
+                log('✅ barber_id é um UUID válido', 'success');
+            } else {
+                log('❌ barber_id NÃO é um UUID válido', 'error');
+            }
+        }
+
+        function testServiceIdAsBarber() {
+            log('=== TESTE: ID de Serviço como Barbeiro ===', 'warning');
+            
+            const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+            const barbaService = services.find(s => s.id === 'barba');
+            
+            if (!barbaService) {
+                log('❌ Serviço "barba" não encontrado', 'error');
+                return;
+            }
+            
+            log(`🔍 Serviço "barba" encontrado: ${barbaService.name}`);
+            
+            // Simular o erro
+            const corruptedBookingData = {
+                id: 'test-corrupted-' + Date.now(),
+                user_id: 'test-user',
+                service_id: 'corte-barba',
+                barber_id: 'barba', // ERRO: usando ID de serviço
+                booking_date: new Date().toISOString().split('T')[0],
+                booking_time: '10:00',
+                status: 'scheduled'
+            };
+            
+            log('🚨 Simulando agendamento com erro:', 'error');
+            log(`<pre>${JSON.stringify(corruptedBookingData, null, 2)}</pre>`);
+            
+            // Verificar validação
+            if (isValidUUID(corruptedBookingData.barber_id)) {
+                log('❌ FALHA: Sistema não detectou o erro!', 'error');
+            } else {
+                log('✅ Sistema detectou corretamente que não é UUID válido', 'success');
+            }
+            
+            // Verificar se é ID de serviço
+            if (services.some(s => s.id === corruptedBookingData.barber_id)) {
+                log('🚨 CONFIRMADO: barber_id é um ID de serviço!', 'error');
+            }
+        }
+
+        function testCorruptedLocalStorage() {
+            log('=== TESTE: localStorage Corrompido ===', 'warning');
+            
+            // Backup dados atuais
+            const backup = {
+                services: localStorage.getItem('adminServices'),
+                barbers: localStorage.getItem('adminBarbers'),
+                bookings: localStorage.getItem('userBookings')
+            };
+            
+            try {
+                // Criar dados corrompidos
+                const corruptedBarbers = [
+                    { id: 'barba', name: 'Barbeiro Corrompido', specialty: 'Erro' },
+                    { id: 'carlos', name: 'Carlos Normal', specialty: 'Normal' }
+                ];
+                
+                localStorage.setItem('adminBarbers', JSON.stringify(corruptedBarbers));
+                log('🧪 Dados corrompidos inseridos no localStorage');
+                
+                // Verificar estado
+                updateSystemState();
+                
+                // Simular agendamento com dados corrompidos
+                const corruptedBooking = {
+                    id: 'test-corrupted-' + Date.now(),
+                    user_id: 'test-user',
+                    service_id: 'corte-barba',
+                    barber_id: 'barba',
+                    booking_date: new Date().toISOString().split('T')[0],
+                    booking_time: '10:00',
+                    status: 'scheduled'
+                };
+                
+                log('🚨 Tentando criar agendamento com barbeiro corrompido:', 'error');
+                log(`<pre>${JSON.stringify(corruptedBooking, null, 2)}</pre>`);
+                
+            } finally {
+                // Restaurar backup
+                setTimeout(() => {
+                    if (backup.services) localStorage.setItem('adminServices', backup.services);
+                    if (backup.barbers) localStorage.setItem('adminBarbers', backup.barbers);
+                    if (backup.bookings) localStorage.setItem('userBookings', backup.bookings);
+                    log('🔄 Dados originais restaurados');
+                    updateSystemState();
+                }, 3000);
+            }
+        }
+
+        function testArrayMixing() {
+            log('=== TESTE: Mistura de Arrays ===', 'warning');
+            
+            const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+            const barbers = JSON.parse(localStorage.getItem('adminBarbers') || '[]');
+            
+            log('🔍 Verificando sobreposição de IDs...');
+            
+            const serviceIds = services.map(s => s.id);
+            const barberIds = barbers.map(b => b.id);
+            
+            const overlapping = serviceIds.filter(id => barberIds.includes(id));
+            
+            if (overlapping.length > 0) {
+                log(`🚨 IDs sobrepostos encontrados: ${overlapping.join(', ')}`, 'error');
+            } else {
+                log('✅ Nenhuma sobreposição de IDs encontrada', 'success');
+            }
+            
+            // Verificar estruturas
+            log('🔍 Verificando estruturas de dados...');
+            
+            services.forEach(service => {
+                if (service.specialty || service.email) {
+                    log(`❌ Serviço com propriedades de barbeiro: ${service.id}`, 'error');
+                }
+            });
+            
+            barbers.forEach(barber => {
+                if (barber.price || barber.duration) {
+                    log(`❌ Barbeiro com propriedades de serviço: ${barber.id}`, 'error');
+                }
+            });
+        }
+
+        function inspectCurrentState() {
+            log('=== INSPEÇÃO: Estado Atual ===', 'info');
+            
+            const keys = Object.keys(localStorage);
+            log(`Chaves no localStorage: ${keys.join(', ')}`);
+            
+            keys.forEach(key => {
+                try {
+                    const value = localStorage.getItem(key);
+                    const parsed = JSON.parse(value);
+                    log(`✅ ${key}: ${Array.isArray(parsed) ? parsed.length + ' itens' : typeof parsed}`);
+                    
+                    if (key === 'userBookings' && Array.isArray(parsed)) {
+                        const invalidBookings = parsed.filter(b => b.barber_id === 'barba');
+                        if (invalidBookings.length > 0) {
+                            log(`🚨 ${invalidBookings.length} agendamentos com barber_id 'barba' encontrados!`, 'error');
+                        }
+                    }
+                } catch (e) {
+                    log(`❌ ${key}: Erro de parsing`, 'error');
+                }
+            });
+            
+            updateSystemState();
+        }
+
+        function simulateBookingFlow() {
+            log('=== SIMULAÇÃO: Fluxo de Agendamento ===', 'info');
+            
+            // Simular seleção de serviço
+            const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+            const selectedService = services.find(s => s.id === 'barba');
+            
+            if (selectedService) {
+                log(`1️⃣ Serviço selecionado: ${selectedService.id} - ${selectedService.name}`);
+                
+                // Simular erro onde serviço é usado como barbeiro
+                log('2️⃣ SIMULANDO ERRO: Usando ID de serviço como barbeiro...');
+                
+                const errorScenario = {
+                    selectedService: selectedService.id,
+                    selectedBarber: selectedService.id, // ERRO!
+                    selectedDate: new Date().toISOString().split('T')[0],
+                    selectedTime: '10:00'
+                };
+                
+                log(`<pre>${JSON.stringify(errorScenario, null, 2)}</pre>`);
+                
+                if (errorScenario.selectedBarber === 'barba') {
+                    log('🚨 ERRO REPRODUZIDO: selectedBarber = "barba"!', 'error');
+                }
+            }
+        }
+
+        function testUUIDValidation() {
+            log('=== TESTE: Validação UUID ===', 'info');
+            
+            const testCases = [
+                'barba',
+                'carlos',
+                '123e4567-e89b-12d3-a456-426614174000',
+                'invalid-uuid',
+                '',
+                null,
+                undefined
+            ];
+            
+            testCases.forEach(testCase => {
+                const isValid = isValidUUID(testCase);
+                const status = isValid ? '✅' : '❌';
+                log(`${status} "${testCase}": ${isValid ? 'UUID válido' : 'UUID inválido'}`);
+            });
+        }
+
+        function clearAndReset() {
+            if (!confirm('Limpar todos os dados de teste?')) return;
+            
+            log('=== LIMPEZA: Removendo dados de teste ===', 'warning');
+            
+            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            const cleanBookings = bookings.filter(b => !b.id.startsWith('test-'));
+            
+            localStorage.setItem('userBookings', JSON.stringify(cleanBookings));
+            
+            log(`🧹 ${bookings.length - cleanBookings.length} agendamentos de teste removidos`);
+            updateSystemState();
+        }
+
+        function isValidUUID(uuid) {
+            if (!uuid || typeof uuid !== 'string') return false;
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            return uuidRegex.test(uuid);
+        }
+
+        // Inicialização
+        window.onload = function() {
+            log('🚀 Sistema de testes inicializado', 'success');
+            updateSystemState();
+        };
+    </script>
+</body>
+</html>

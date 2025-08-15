@@ -6,6 +6,7 @@ import { MessageCircle, X, Send, User, Bot, Scissors, Settings, UserCircle } fro
 import { useGeminiAI } from '../hooks/useGeminiAI';
 import { supabase } from '../integrations/supabase/client';
 import { GeminiStatus } from './GeminiStatus';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Message {
   id: string;
@@ -47,6 +48,7 @@ const ChatBot: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [showGeminiStatus, setShowGeminiStatus] = useState(false);
   const [isConsultantMode, setIsConsultantMode] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { generateResponse, generateRecommendations: generateAIRecommendations } = useGeminiAI();
 
@@ -111,6 +113,21 @@ const ChatBot: React.FC = () => {
     };
 
     fetchServices();
+  }, []);
+
+  // Monitor user authentication state
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleOptionClick = (option: string) => {
@@ -227,16 +244,17 @@ const ChatBot: React.FC = () => {
           
           if (isConsultantMode) {
             // Modo consultor especializado em barbearia
-            const consultantPrompt = `Você é um consultor especializado em barbearia com anos de experiência. Responda de forma calorosa, humana e prestativa, mantendo sempre uma postura respeitosa e profissional. 
+            const consultantPrompt = `Você é um agente de barbearia especializado com anos de experiência. Responda de forma calorosa, humana e prestativa, mantendo sempre uma postura respeitosa e profissional. 
             
-            Você conhece profundamente:
-            - Procedimentos de atendimento em barbearia (corte de cabelo, barba, hidratação, etc.)
-            - Produtos de higiene pessoal e produtos utilizados em barbearias (shampoo, pomada, óleo para barba, toalhas aquecidas, etc.)
-            - Técnicas de corte e estilização
-            - Cuidados pós-corte e manutenção
-            - Tendências e estilos masculinos
+            Você deve conhecer profundamente:
+            - Procedimentos de atendimento em barbearia (corte de cabelo, barba, hidratação, pigmentação, etc.)
+            - Produtos de higiene pessoal e produtos utilizados em barbearias (shampoo, pomada, óleo para barba, toalhas aquecidas, ceras modeladoras, produtos pós-barba, etc.)
+            - Técnicas de corte e estilização modernas e clássicas
+            - Cuidados pós-corte e manutenção capilar
+            - Tendências e estilos masculinos atuais
+            - Tipos de cabelo e suas necessidades específicas
             
-            Sua missão é oferecer suporte de forma acolhedora, engajando o usuário em uma conversa mais próxima e personalizada. Tente responder e sanar todas as dúvidas do cliente sobre serviços e produtos, sempre mantendo um tom amigável e profissional.
+            Seu objetivo é oferecer suporte de forma acolhedora, engajando o usuário em uma conversa mais próxima e personalizada. Tente responder e sanar todas as dúvidas do cliente sobre serviços e produtos, sempre mantendo um tom amigável e profissional. Use emojis quando apropriado para tornar a conversa mais calorosa.
             
             Pergunta do cliente: ${userMessage}`;
             
@@ -301,16 +319,64 @@ const ChatBot: React.FC = () => {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, userMessage]);
+    setIsTyping(true);
 
-    setTimeout(() => {
-      const responseMessage: Message = {
-        id: Date.now().toString(),
-        text: "Entendo perfeitamente! 😊 Tomar uma decisão sobre seu visual é algo importante e merece reflexão. Fico muito grato pelo seu interesse em nossos serviços. Quando estiver pronto para dar esse passo, estaremos aqui de braços abertos para cuidar de você com todo carinho e profissionalismo que merece. Até breve! 👋✨",
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, responseMessage]);
-    }, 1000);
+    try {
+      // Prompt específico para "Preciso pensar mais"
+      const thinkingPrompt = `Você é um assistente de barbearia caloroso e humano. O cliente disse que "precisa pensar mais" sobre agendar um serviço. 
+      
+      Responda com uma mensagem breve e acolhedora que:
+      - Mostre compreensão e gratidão pelo interesse
+      - Convide o cliente a voltar quando estiver pronto
+      - Encerre a conversa de forma cordial
+      - Use um tom caloroso, humano e prestativo
+      - Mantenha uma postura respeitosa e profissional
+      
+      Máximo 2-3 frases.`;
+      
+      const aiResponse = await generateResponse(thinkingPrompt, {
+        customerProfile,
+        services: services.map(service => ({
+          ...service,
+          duration_minutes: service.duration
+        })),
+        conversationHistory: messages.map(m => m.text)
+      });
+      
+      setTimeout(() => {
+        setIsTyping(false);
+        const responseMessage: Message = {
+          id: Date.now().toString(),
+          text: aiResponse.text,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, responseMessage]);
+        
+        // Encerrar a conversa após 3 segundos
+        setTimeout(() => {
+          setIsOpen(false);
+        }, 3000);
+      }, 1500);
+    } catch (error) {
+      console.error('Erro ao gerar resposta:', error);
+      setIsTyping(false);
+      
+      setTimeout(() => {
+        const fallbackMessage: Message = {
+          id: Date.now().toString(),
+          text: "Entendo perfeitamente! 😊 Tomar uma decisão sobre seu visual é algo importante e merece reflexão. Fico muito grato pelo seu interesse em nossos serviços. Quando estiver pronto para dar esse passo, estaremos aqui de braços abertos para cuidar de você com todo carinho e profissionalismo que merece. Até breve! 👋✨",
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, fallbackMessage]);
+        
+        // Encerrar a conversa após 3 segundos
+        setTimeout(() => {
+          setIsOpen(false);
+        }, 3000);
+      }, 1000);
+    }
   };
 
   const handleOtherQuestions = async () => {
@@ -322,16 +388,56 @@ const ChatBot: React.FC = () => {
      };
      setMessages(prev => [...prev, userMessage]);
      setIsConsultantMode(true);
+     setIsTyping(true);
  
-     setTimeout(() => {
-       const responseMessage: Message = {
-         id: Date.now().toString(),
-         text: "Que ótimo! 😊 Agora sou seu consultor pessoal especializado em barbearia! Estou aqui para esclarecer todas suas dúvidas sobre nossos serviços, produtos e procedimentos. Pode perguntar à vontade sobre cortes, barbas, tratamentos, produtos que usamos, cuidados pós-corte, ou qualquer coisa relacionada ao mundo da barbearia. Como posso te ajudar? 💬✨",
-         sender: 'bot',
-         timestamp: new Date()
-       };
-       setMessages(prev => [...prev, responseMessage]);
-     }, 1000);
+     try {
+       // Prompt específico para ativar o agente especializado
+       const consultantPrompt = `Você é um agente de barbearia especializado que foi ativado para responder dúvidas. O cliente disse que "tem outras dúvidas".
+       
+       Você deve conhecer profundamente:
+       - Procedimentos de atendimento em barbearia (corte de cabelo, barba, hidratação, etc.)
+       - Produtos de higiene pessoal e produtos utilizados em barbearias (shampoo, pomada, óleo para barba, toalhas aquecidas, etc.)
+       - Técnicas de corte e estilização
+       - Cuidados pós-corte e manutenção
+       - Tendências e estilos masculinos
+       
+       Responda de forma acolhedora, engajando o usuário em uma conversa mais próxima e personalizada. Use um tom amigável e profissional. Apresente-se como consultor especializado e convide o cliente a fazer perguntas sobre serviços e produtos.
+       
+       Máximo 3-4 frases.`;
+       
+       const aiResponse = await generateResponse(consultantPrompt, {
+         customerProfile,
+         services: services.map(service => ({
+           ...service,
+           duration_minutes: service.duration
+         })),
+         conversationHistory: messages.map(m => m.text)
+       });
+       
+       setTimeout(() => {
+         setIsTyping(false);
+         const responseMessage: Message = {
+           id: Date.now().toString(),
+           text: aiResponse.text,
+           sender: 'bot',
+           timestamp: new Date()
+         };
+         setMessages(prev => [...prev, responseMessage]);
+       }, 1500);
+     } catch (error) {
+       console.error('Erro ao gerar resposta:', error);
+       setIsTyping(false);
+       
+       setTimeout(() => {
+         const fallbackMessage: Message = {
+           id: Date.now().toString(),
+           text: "Que ótimo! 😊 Agora sou seu consultor pessoal especializado em barbearia! Estou aqui para esclarecer todas suas dúvidas sobre nossos serviços, produtos e procedimentos. Pode perguntar à vontade sobre cortes, barbas, tratamentos, produtos que usamos, cuidados pós-corte, ou qualquer coisa relacionada ao mundo da barbearia. Como posso te ajudar? 💬✨",
+           sender: 'bot',
+           timestamp: new Date()
+         };
+         setMessages(prev => [...prev, fallbackMessage]);
+       }, 1000);
+     }
    };
 
   const resetChat = () => {
@@ -426,15 +532,17 @@ const ChatBot: React.FC = () => {
                  <h3 className="font-semibold text-sm sm:text-base">Assistente Virtual</h3>
                </div>
               <div className="flex items-center gap-1 sm:gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowGeminiStatus(true)}
-                  className="text-white hover:bg-white/20 p-1 h-7 w-7 sm:h-8 sm:w-8"
-                  title="Status do Gemini AI"
-                >
-                  <Settings className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
-                </Button>
+                {user?.email === 'egrinaldo19@gmail.com' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowGeminiStatus(true)}
+                    className="text-white hover:bg-white/20 p-1 h-7 w-7 sm:h-8 sm:w-8"
+                    title="Status do Gemini AI"
+                  >
+                    <Settings className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"

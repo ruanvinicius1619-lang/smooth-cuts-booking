@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug localStorage Corruption</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .error { background-color: #fee; border-color: #fcc; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .info { background-color: #e7f3ff; border-color: #b3d9ff; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .danger { background: #dc3545; }
+        .danger:hover { background: #c82333; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug localStorage Corruption</h1>
+        <p>Ferramenta para detectar e corrigir corrupção de dados no localStorage que pode estar causando o erro UUID "barba".</p>
+        
+        <div class="section">
+            <h3>🚨 Status Atual</h3>
+            <div id="currentStatus">Verificando...</div>
+        </div>
+        
+        <div class="section">
+            <h3>🔧 Ações de Diagnóstico</h3>
+            <button onclick="fullDiagnosis()">Diagnóstico Completo</button>
+            <button onclick="checkDataIntegrity()">Verificar Integridade</button>
+            <button onclick="findCorruption()">Encontrar Corrupção</button>
+        </div>
+        
+        <div class="section">
+            <h3>🧹 Ações de Limpeza</h3>
+            <button onclick="cleanCorruptedData()" class="danger">Limpar Dados Corrompidos</button>
+            <button onclick="resetAllData()" class="danger">Reset Completo</button>
+            <button onclick="backupAndClean()">Backup e Limpeza</button>
+        </div>
+        
+        <div class="section">
+            <h3>📊 Resultados</h3>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('currentStatus');
+            status.className = `section ${type}`;
+            status.innerHTML = message;
+        }
+
+        function fullDiagnosis() {
+            log('=== INICIANDO DIAGNÓSTICO COMPLETO ===', 'info');
+            
+            // 1. Verificar estrutura básica
+            log('1. Verificando estrutura básica do localStorage...');
+            const keys = Object.keys(localStorage);
+            log(`Chaves encontradas: ${keys.join(', ')}`);
+            
+            // 2. Verificar cada item
+            keys.forEach(key => {
+                try {
+                    const value = localStorage.getItem(key);
+                    const parsed = JSON.parse(value);
+                    log(`✅ ${key}: ${Array.isArray(parsed) ? parsed.length + ' itens' : typeof parsed}`);
+                } catch (e) {
+                    log(`❌ ${key}: Erro de parsing - ${e.message}`, 'error');
+                }
+            });
+            
+            // 3. Verificar dados específicos
+            checkServicesData();
+            checkBarbersData();
+            checkBookingsData();
+            checkForMixedData();
+        }
+
+        function checkServicesData() {
+            log('=== VERIFICANDO DADOS DE SERVIÇOS ===');
+            try {
+                const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+                log(`Serviços encontrados: ${services.length}`);
+                
+                services.forEach((service, index) => {
+                    if (!service.id || !service.name) {
+                        log(`❌ Serviço ${index}: Estrutura inválida`, 'error');
+                    } else {
+                        log(`✅ Serviço: ${service.id} - ${service.name}`);
+                        if (service.id === 'barba') {
+                            log(`⚠️ ATENÇÃO: Serviço com ID 'barba' encontrado!`, 'warning');
+                        }
+                    }
+                });
+            } catch (e) {
+                log(`❌ Erro ao verificar serviços: ${e.message}`, 'error');
+            }
+        }
+
+        function checkBarbersData() {
+            log('=== VERIFICANDO DADOS DE BARBEIROS ===');
+            try {
+                const barbers = JSON.parse(localStorage.getItem('adminBarbers') || '[]');
+                log(`Barbeiros encontrados: ${barbers.length}`);
+                
+                barbers.forEach((barber, index) => {
+                    if (!barber.id || !barber.name) {
+                        log(`❌ Barbeiro ${index}: Estrutura inválida`, 'error');
+                    } else {
+                        log(`✅ Barbeiro: ${barber.id} - ${barber.name}`);
+                        if (barber.id === 'barba') {
+                            log(`🚨 PROBLEMA CRÍTICO: Barbeiro com ID 'barba' encontrado!`, 'error');
+                        }
+                    }
+                });
+            } catch (e) {
+                log(`❌ Erro ao verificar barbeiros: ${e.message}`, 'error');
+            }
+        }
+
+        function checkBookingsData() {
+            log('=== VERIFICANDO DADOS DE AGENDAMENTOS ===');
+            try {
+                const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+                log(`Agendamentos encontrados: ${bookings.length}`);
+                
+                const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+                const serviceIds = services.map(s => s.id);
+                
+                bookings.forEach((booking, index) => {
+                    if (booking.barber_id === 'barba') {
+                        log(`🚨 PROBLEMA CRÍTICO: Agendamento ${index + 1} com barber_id 'barba'!`, 'error');
+                    }
+                    
+                    if (serviceIds.includes(booking.barber_id)) {
+                        log(`❌ ERRO: Agendamento ${index + 1} usa ID de serviço como barber_id: ${booking.barber_id}`, 'error');
+                    }
+                });
+            } catch (e) {
+                log(`❌ Erro ao verificar agendamentos: ${e.message}`, 'error');
+            }
+        }
+
+        function checkForMixedData() {
+            log('=== VERIFICANDO MISTURA DE DADOS ===');
+            try {
+                const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
+                const barbers = JSON.parse(localStorage.getItem('adminBarbers') || '[]');
+                
+                // Verificar se há IDs duplicados entre serviços e barbeiros
+                const serviceIds = services.map(s => s.id);
+                const barberIds = barbers.map(b => b.id);
+                
+                const duplicates = serviceIds.filter(id => barberIds.includes(id));
+                if (duplicates.length > 0) {
+                    log(`🚨 IDs DUPLICADOS ENCONTRADOS: ${duplicates.join(', ')}`, 'error');
+                } else {
+                    log('✅ Nenhum ID duplicado entre serviços e barbeiros');
+                }
+                
+                // Verificar se há estruturas de dados misturadas
+                services.forEach(service => {
+                    if (service.specialty || service.email || service.phone) {
+                        log(`❌ Serviço com propriedades de barbeiro: ${service.id}`, 'error');
+                    }
+                });
+                
+                barbers.forEach(barber => {
+                    if (barber.price || barber.duration || barber.description) {
+                        log(`❌ Barbeiro com propriedades de serviço: ${barber.id}`, 'error');
+                    }
+                });
+                
+            } catch (e) {
+                log(`❌ Erro ao verificar mistura de dados: ${e.message}`, 'error');
+            }
+        }
+
+        function checkDataIntegrity() {
+            log('=== VERIFICAÇÃO DE INTEGRIDADE ===', 'info');
+            
+            let hasErrors = false;
+            
+            // Verificar se todos os dados são válidos JSON
+            ['adminServices', 'adminBarbers', 'userBookings', 'barbershopSettings'].forEach(key => {
+                try {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        JSON.parse(data);
+                        log(`✅ ${key}: JSON válido`);
+                    }
+                } catch (e) {
+                    log(`❌ ${key}: JSON inválido - ${e.message}`, 'error');
+                    hasErrors = true;
+                }
+            });
+            
+            if (!hasErrors) {
+                updateStatus('✅ Integridade dos dados OK', 'success');
+            } else {
+                updateStatus('❌ Problemas de integridade detectados', 'error');
+            }
+        }
+
+        function findCorruption() {
+            log('=== PROCURANDO CORRUPÇÃO ESPECÍFICA ===', 'warning');
+            
+            // Procurar pelo problema específico do "barba"
+            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            const corruptedBookings = bookings.filter(b => b.barber_id === 'barba');
+            
+            if (corruptedBookings.length > 0) {
+                log(`🚨 CORRUPÇÃO ENCONTRADA: ${corruptedBookings.length} agendamentos com barber_id 'barba'`, 'error');
+                corruptedBookings.forEach((booking, index) => {
+                    log(`Agendamento corrompido ${index + 1}: ID ${booking.id}, Data: ${booking.booking_date}`);
+                });
+                updateStatus('🚨 Corrupção detectada!', 'error');
+            } else {
+                log('✅ Nenhuma corrupção específica encontrada');
+                updateStatus('✅ Nenhuma corrupção detectada', 'success');
+            }
+        }
+
+        function cleanCorruptedData() {
+            if (!confirm('Tem certeza que deseja limpar os dados corrompidos? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+            
+            log('=== LIMPANDO DADOS CORROMPIDOS ===', 'warning');
+            
+            try {
+                // Limpar agendamentos com barber_id inválido
+                const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+                const validBookings = bookings.filter(booking => {
+                    if (booking.barber_id === 'barba' || !booking.barber_id) {
+                        log(`🧹 Removendo agendamento corrompido: ${booking.id}`);
+                        return false;
+                    }
+                    return true;
+                });
+                
+                localStorage.setItem('userBookings', JSON.stringify(validBookings));
+                log(`✅ Limpeza concluída. ${bookings.length - validBookings.length} agendamentos removidos`, 'success');
+                
+                updateStatus('✅ Dados corrompidos removidos', 'success');
+            } catch (e) {
+                log(`❌ Erro durante limpeza: ${e.message}`, 'error');
+                updateStatus('❌ Erro durante limpeza', 'error');
+            }
+        }
+
+        function backupAndClean() {
+            log('=== BACKUP E LIMPEZA ===', 'info');
+            
+            // Criar backup
+            const backup = {};
+            Object.keys(localStorage).forEach(key => {
+                backup[key] = localStorage.getItem(key);
+            });
+            
+            // Salvar backup no console para recuperação
+            console.log('BACKUP DOS DADOS:', backup);
+            log('✅ Backup criado (verifique o console do navegador)');
+            
+            // Limpar dados corrompidos
+            cleanCorruptedData();
+        }
+
+        function resetAllData() {
+            if (!confirm('ATENÇÃO: Isso irá remover TODOS os dados do localStorage. Tem certeza?')) {
+                return;
+            }
+            
+            log('=== RESET COMPLETO ===', 'error');
+            
+            // Backup antes do reset
+            const backup = {};
+            Object.keys(localStorage).forEach(key => {
+                backup[key] = localStorage.getItem(key);
+            });
+            console.log('BACKUP ANTES DO RESET:', backup);
+            
+            // Limpar tudo
+            localStorage.clear();
+            
+            log('🧹 Todos os dados foram removidos', 'warning');
+            updateStatus('🧹 Reset completo realizado', 'warning');
+        }
+
+        // Executar diagnóstico inicial
+        window.onload = function() {
+            updateStatus('🔍 Pronto para diagnóstico', 'info');
+            checkDataIntegrity();
+        };
+    </script>
+</body>
+</html>
