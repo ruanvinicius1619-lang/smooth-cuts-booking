@@ -5,9 +5,9 @@ interface MapProps {
 }
 
 const Map = ({ className }: MapProps) => {
-  // Coordenadas para São Paulo, SP - Centro (exemplo)
-  const latitude = -23.5505;
-  const longitude = -46.6333;
+  // Coordenadas para Aracaju, SE - Centro
+  const latitude = -10.9472;
+  const longitude = -37.0731;
   const address = "Rua São Gonçalo, nº 36 – Bairro Santos Dumont";
   
   // URL do Google Maps embed
@@ -38,7 +38,7 @@ const Map = ({ className }: MapProps) => {
             <div className="text-sm">
               <div className="font-semibold text-gray-900">Mateus Barbershop</div>
               <div className="text-gray-600">Rua São Gonçalo, nº 36 – Bairro Santos Dumont</div>
-              <div className="text-gray-600">São Paulo, SP</div>
+              <div className="text-gray-600">Aracaju, SE</div>
             </div>
           </div>
         </div>
