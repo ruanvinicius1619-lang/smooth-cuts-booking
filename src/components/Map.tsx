@@ -28,7 +28,7 @@ const Map = ({ className }: MapProps) => {
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          title="Localização da Smooth Cuts Barbearia"
+          title="Localização da Mateus Barbershop"
         />
         
         {/* Overlay com informações */}
