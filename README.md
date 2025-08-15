@@ -74,23 +74,23 @@ src/
 └── assets/          # Imagens e recursos
 ```
 
-**Edit a file directly in GitHub**
+**Edite um arquivo diretamente no GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Navegue até o(s) arquivo(s) desejado(s).
+- Clique no botão "Editar" (ícone de lápis) no canto superior direito da visualização do arquivo.
+- Faça suas alterações e confirme-as.
 
-**Use GitHub Codespaces**
+**Use os Codespaces do GitHub**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Navegue até a página principal do seu repositório.
+- Clique no botão "Código" (botão verde) próximo ao canto superior direito.
+- Selecione a aba "Codespaces".
+- Clique em "Novo codespace" para iniciar um novo ambiente do Codespace.
+- Edite os arquivos diretamente no Codespace, confirme e envie suas alterações assim que terminar.
 
-## What technologies are used for this project?
+## Quais tecnologias são usadas neste projeto?
 
-This project is built with:
+Este projeto foi criado com:
 
 - Vite
 - TypeScript
@@ -98,14 +98,14 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Como posso implementar este projeto?
 
-Simply open [Lovable](https://lovable.dev/projects/3dceb11f-473b-4ba4-985f-064fb293409d) and click on Share -> Publish.
+Basta abrir o [Lovable](https://lovable.dev/projects/3dceb11f-473b-4ba4-985f-064fb293409d) e clicar em Compartilhar -> Publicar.
 
-## Can I connect a custom domain to my Lovable project?
+## Posso conectar um domínio personalizado ao meu projeto Lovable?
 
-Yes, you can!
+Sim, você pode!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Para conectar um domínio, navegue até Projeto > Configurações > Domínios e clique em Conectar Domínio.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Leia mais aqui: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
