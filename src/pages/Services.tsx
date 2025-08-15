@@ -11,7 +11,7 @@ import corteBarbasobrancelha from "@/assets/corte+barba+sobrancelha.jpeg";
 import corteTesoura from "@/assets/corte-na-tesoura.jpeg";
 import corteDegrade from "@/assets/corte-degrade.jpeg";
 import corteNavalhado from "@/assets/corte-navalhado.jpeg";
-import contornoPezinho from "@/assets/contorno pezinho.jpeg";
+import contornoPezinho from "@/assets/contorno-pezinho.jpeg";
 import selagemCorte from "@/assets/selagem+corte.jpeg";
 import { useAdminData } from "@/hooks/useAdminData";
 import barberService from "@/assets/barber-service.jpg";
