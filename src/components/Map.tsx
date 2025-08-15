@@ -28,7 +28,7 @@ const Map = ({ className }: MapProps) => {
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          title="Localização da Smooth Cuts Barbearia"
+          title="Localização da Mateus Barbershop"
         />
         
         {/* Overlay com informações */}
@@ -36,7 +36,7 @@ const Map = ({ className }: MapProps) => {
           <div className="flex items-start gap-2">
             <MapPin className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
             <div className="text-sm">
-              <div className="font-semibold text-gray-900">Smooth Cuts Barbearia</div>
+              <div className="font-semibold text-gray-900">Mateus Barbershop</div>
               <div className="text-gray-600">Rua São Gonçalo, nº 36 – Bairro Santos Dumont</div>
               <div className="text-gray-600">São Paulo, SP</div>
             </div>

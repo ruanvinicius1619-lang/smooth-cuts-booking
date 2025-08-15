@@ -1,4 +1,4 @@
-# 🪒 Smooth Cuts Booking - Sistema de Agendamento para Barbearia
+# 🪒 Mateus Barbershop - Sistema de Agendamento para Barbearia
 
 Sistema completo de agendamento online para barbearias, desenvolvido com React, TypeScript e Supabase.
 
