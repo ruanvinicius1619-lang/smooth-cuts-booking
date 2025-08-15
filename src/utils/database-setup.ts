@@ -41,16 +41,16 @@ const runMigrationsAutomatically = async (): Promise<boolean> => {
     
     // Criar dados iniciais diretamente nas tabelas
     const defaultServices = [
-      { name: 'Corte + Pigmentação', description: 'Corte de cabelo com pigmentação', price: 45.00, duration_minutes: 50 },
-      { name: 'Corte + Barba', description: 'Combo completo de corte e barba', price: 50.00, duration_minutes: 40 },
-      { name: 'Corte + Sobrancelhas', description: 'Corte de cabelo com design de sobrancelhas', price: 60.00, duration_minutes: 50 },
-      { name: 'Corte + Barba + Sobrancelhas', description: 'Combo completo com todos os serviços', price: 60.00, duration_minutes: 60 },
-      { name: 'Corte na Tesoura', description: 'Corte tradicional feito na tesoura', price: 45.00, duration_minutes: 35 },
-      { name: 'Corte Degradê', description: 'Corte moderno com degradê', price: 40.00, duration_minutes: 30 },
-      { name: 'Corte Navalhado', description: 'Corte com acabamento na navalha', price: 40.00, duration_minutes: 30 },
-      { name: 'Barba', description: 'Aparar e modelar a barba', price: 25.00, duration_minutes: 20 },
-      { name: 'Contorno Pezinho', description: 'Contorno e acabamento do pezinho', price: 20.00, duration_minutes: 15 },
-      { name: 'Corte + Selagem', description: 'Corte com tratamento de selagem', price: 120.00, duration_minutes: 90 }
+      { name: 'Corte + Pigmentação', description: 'Corte de cabelo com pigmentação', price: 45.00, duration: 50 },
+      { name: 'Corte + Barba', description: 'Combo completo de corte e barba', price: 50.00, duration: 40 },
+      { name: 'Corte + Sobrancelhas', description: 'Corte de cabelo com design de sobrancelhas', price: 60.00, duration: 50 },
+      { name: 'Corte + Barba + Sobrancelhas', description: 'Combo completo com todos os serviços', price: 60.00, duration: 60 },
+      { name: 'Corte na Tesoura', description: 'Corte tradicional feito na tesoura', price: 45.00, duration: 35 },
+      { name: 'Corte Degradê', description: 'Corte moderno com degradê', price: 40.00, duration: 30 },
+      { name: 'Corte Navalhado', description: 'Corte com acabamento na navalha', price: 40.00, duration: 30 },
+      { name: 'Barba', description: 'Aparar e modelar a barba', price: 25.00, duration: 20 },
+      { name: 'Contorno Pezinho', description: 'Contorno e acabamento do pezinho', price: 20.00, duration: 15 },
+      { name: 'Corte + Selagem', description: 'Corte com tratamento de selagem', price: 120.00, duration: 90 }
     ];
     
     const defaultBarbers = [

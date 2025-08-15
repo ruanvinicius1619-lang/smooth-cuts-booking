@@ -117,7 +117,7 @@ const getDefaultServices = () => [
 
 // Barbeiros padrão
 const getDefaultBarbers = () => [
-  { id: "carlos", name: "Mateus Pereira", specialty: "Cortes clássicos", email: "carlos@mateusbarber.com", phone: "(11) 98888-8888" },
-  { id: "joao", name: "João Santos", specialty: "Barba e bigode", email: "joao@mateusbarber.com", phone: "(11) 97777-7777" },
-  { id: "pedro", name: "Pedro Costa", specialty: "Cortes modernos", email: "pedro@mateusbarber.com", phone: "(11) 96666-6666" }
+  { id: "550e8400-e29b-41d4-a716-446655440001", name: "Mateus Pereira", specialty: "Cortes clássicos", email: "carlos@mateusbarber.com", phone: "(11) 98888-8888" },
+  { id: "550e8400-e29b-41d4-a716-446655440002", name: "João Santos", specialty: "Barba e bigode", email: "joao@mateusbarber.com", phone: "(11) 97777-7777" },
+  { id: "550e8400-e29b-41d4-a716-446655440003", name: "Pedro Costa", specialty: "Cortes modernos", email: "pedro@mateusbarber.com", phone: "(11) 96666-6666" }
 ];

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Agendamento Egrinaldo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+        .warning {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificar Agendamento do Egrinaldo</h1>
+        
+        <div class="section">
+            <h3>1. Verificar localStorage</h3>
+            <button onclick="checkLocalStorage()">Verificar localStorage</button>
+            <div id="localStorageResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>2. Verificar Supabase - Tabela bookings</h3>
+            <button onclick="checkSupabaseBookings()">Verificar Supabase Bookings</button>
+            <div id="supabaseBookingsResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>3. Verificar Supabase - Perfil do usuário</h3>
+            <button onclick="checkSupabaseProfile()">Verificar Perfil</button>
+            <div id="supabaseProfileResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>4. Verificar todos os agendamentos recentes</h3>
+            <button onclick="checkAllRecentBookings()">Verificar Todos os Agendamentos</button>
+            <div id="allBookingsResult" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>5. Limpar localStorage (se necessário)</h3>
+            <button onclick="clearLocalStorage()" style="background-color: #dc3545;">Limpar localStorage</button>
+            <div id="clearResult" class="result"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        const supabaseUrl = 'https://ywqhqjqjqjqjqjqjqjqj.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3cWhxanFqcWpxanFqcWpxanFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQzMDI0MDAsImV4cCI6MjA0OTg3ODQwMH0.example';
+        
+        // Tentar obter as variáveis do localStorage ou usar valores padrão
+        const actualSupabaseUrl = localStorage.getItem('supabaseUrl') || supabaseUrl;
+        const actualSupabaseKey = localStorage.getItem('supabaseKey') || supabaseKey;
+        
+        let supabase;
+        try {
+            supabase = createClient(actualSupabaseUrl, actualSupabaseKey);
+        } catch (error) {
+            console.error('Erro ao criar cliente Supabase:', error);
+        }
+
+        window.checkLocalStorage = function() {
+            const result = document.getElementById('localStorageResult');
+            try {
+                const bookings = localStorage.getItem('bookings');
+                const appointments = localStorage.getItem('appointments');
+                const userBookings = localStorage.getItem('userBookings');
+                
+                let output = '📋 Verificando localStorage...\n\n';
+                
+                if (bookings) {
+                    const parsedBookings = JSON.parse(bookings);
+                    output += `✅ Encontrado 'bookings': ${parsedBookings.length} item(s)\n`;
+                    
+                    const egrinaldoBookings = parsedBookings.filter(booking => 
+                        booking.user_email === 'egrinaldo25@outlook.com' ||
+                        (booking.userProfile && booking.userProfile.email === 'egrinaldo25@outlook.com')
+                    );
+                    
+                    if (egrinaldoBookings.length > 0) {
+                        output += `🎯 Agendamentos do Egrinaldo encontrados: ${egrinaldoBookings.length}\n`;
+                        egrinaldoBookings.forEach((booking, index) => {
+                            output += `\n   Agendamento ${index + 1}:\n`;
+                            output += `   - ID: ${booking.id}\n`;
+                            output += `   - Data: ${booking.date}\n`;
+                            output += `   - Hora: ${booking.time}\n`;
+                            output += `   - Serviços: ${booking.services ? booking.services.join(', ') : 'N/A'}\n`;
+                            output += `   - Email: ${booking.user_email || booking.userProfile?.email || 'N/A'}\n`;
+                            output += `   - Status: ${booking.status || 'N/A'}\n`;
+                        });
+                    } else {
+                        output += `⚠️  Nenhum agendamento do Egrinaldo encontrado em 'bookings'\n`;
+                    }
+                } else {
+                    output += `❌ Nenhum dado em 'bookings'\n`;
+                }
+                
+                if (appointments) {
+                    const parsedAppointments = JSON.parse(appointments);
+                    output += `\n✅ Encontrado 'appointments': ${parsedAppointments.length} item(s)\n`;
+                    
+                    const egrinaldoAppointments = parsedAppointments.filter(apt => 
+                        apt.user_email === 'egrinaldo25@outlook.com'
+                    );
+                    
+                    if (egrinaldoAppointments.length > 0) {
+                        output += `🎯 Appointments do Egrinaldo: ${egrinaldoAppointments.length}\n`;
+                    }
+                } else {
+                    output += `\n❌ Nenhum dado em 'appointments'\n`;
+                }
+                
+                if (userBookings) {
+                    output += `\n✅ Encontrado 'userBookings'\n`;
+                } else {
+                    output += `\n❌ Nenhum dado em 'userBookings'\n`;
+                }
+                
+                result.textContent = output;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ Erro ao verificar localStorage: ${error.message}`;
+                result.className = 'result error';
+            }
+        };
+
+        window.checkSupabaseBookings = async function() {
+            const result = document.getElementById('supabaseBookingsResult');
+            try {
+                result.textContent = '🔄 Verificando Supabase...';
+                
+                // Primeiro, verificar todos os agendamentos
+                const { data: allBookings, error: allError } = await supabase
+                    .from('bookings')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                let output = '📋 Verificando tabela bookings...\n\n';
+                
+                if (allError) {
+                    output += `❌ Erro ao buscar agendamentos: ${allError.message}\n`;
+                } else {
+                    output += `✅ Total de agendamentos na tabela: ${allBookings.length}\n\n`;
+                    
+                    if (allBookings.length > 0) {
+                        output += 'Últimos 5 agendamentos:\n';
+                        allBookings.slice(0, 5).forEach((booking, index) => {
+                            output += `\n   ${index + 1}. ID: ${booking.id}\n`;
+                            output += `      User ID: ${booking.user_id}\n`;
+                            output += `      Data: ${booking.date}\n`;
+                            output += `      Hora: ${booking.time}\n`;
+                            output += `      Status: ${booking.status}\n`;
+                            output += `      Criado: ${booking.created_at}\n`;
+                        });
+                        
+                        // Procurar especificamente pelo user_id do Egrinaldo
+                        const egrinaldoUserId = '8a013cc5-9530-4837-8084-1331c9e0a551';
+                        const egrinaldoBookings = allBookings.filter(booking => 
+                            booking.user_id === egrinaldoUserId
+                        );
+                        
+                        if (egrinaldoBookings.length > 0) {
+                            output += `\n🎯 Agendamentos do Egrinaldo (${egrinaldoUserId}): ${egrinaldoBookings.length}\n`;
+                            egrinaldoBookings.forEach((booking, index) => {
+                                output += `\n   Agendamento ${index + 1}:\n`;
+                                output += `   - ID: ${booking.id}\n`;
+                                output += `   - Data: ${booking.date}\n`;
+                                output += `   - Hora: ${booking.time}\n`;
+                                output += `   - Serviços: ${booking.services ? booking.services.join(', ') : 'N/A'}\n`;
+                                output += `   - Status: ${booking.status}\n`;
+                                output += `   - Criado: ${booking.created_at}\n`;
+                            });
+                        } else {
+                            output += `\n⚠️  Nenhum agendamento encontrado para o user_id do Egrinaldo\n`;
+                        }
+                    }
+                }
+                
+                result.textContent = output;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ Erro ao verificar Supabase: ${error.message}`;
+                result.className = 'result error';
+            }
+        };
+
+        window.checkSupabaseProfile = async function() {
+            const result = document.getElementById('supabaseProfileResult');
+            try {
+                result.textContent = '🔄 Verificando perfil...';
+                
+                const { data: profiles, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('email', 'egrinaldo25@outlook.com');
+                
+                let output = '👤 Verificando perfil do usuário...\n\n';
+                
+                if (error) {
+                    output += `❌ Erro: ${error.message}\n`;
+                } else if (profiles && profiles.length > 0) {
+                    output += `✅ Perfil encontrado:\n`;
+                    const profile = profiles[0];
+                    output += `   - ID: ${profile.id}\n`;
+                    output += `   - Nome: ${profile.full_name}\n`;
+                    output += `   - Email: ${profile.email}\n`;
+                    output += `   - Telefone: ${profile.phone}\n`;
+                    output += `   - Criado: ${profile.created_at}\n`;
+                } else {
+                    output += `⚠️  Nenhum perfil encontrado\n`;
+                }
+                
+                result.textContent = output;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ Erro: ${error.message}`;
+                result.className = 'result error';
+            }
+        };
+
+        window.checkAllRecentBookings = async function() {
+            const result = document.getElementById('allBookingsResult');
+            try {
+                result.textContent = '🔄 Verificando todos os agendamentos...';
+                
+                const { data: bookings, error } = await supabase
+                    .from('bookings')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                
+                let output = '📅 Últimos 20 agendamentos na tabela bookings:\n\n';
+                
+                if (error) {
+                    output += `❌ Erro: ${error.message}\n`;
+                } else if (bookings && bookings.length > 0) {
+                    output += `✅ ${bookings.length} agendamento(s) encontrado(s):\n\n`;
+                    bookings.forEach((booking, index) => {
+                        output += `${index + 1}. ID: ${booking.id}\n`;
+                        output += `   User ID: ${booking.user_id}\n`;
+                        output += `   Data: ${booking.date}\n`;
+                        output += `   Hora: ${booking.time}\n`;
+                        output += `   Status: ${booking.status}\n`;
+                        output += `   Criado: ${booking.created_at}\n\n`;
+                    });
+                } else {
+                    output += `⚠️  Nenhum agendamento encontrado na tabela bookings\n`;
+                }
+                
+                result.textContent = output;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ Erro: ${error.message}`;
+                result.className = 'result error';
+            }
+        };
+
+        window.clearLocalStorage = function() {
+            const result = document.getElementById('clearResult');
+            try {
+                const keys = ['bookings', 'appointments', 'userBookings'];
+                let output = '🧹 Limpando localStorage...\n\n';
+                
+                keys.forEach(key => {
+                    if (localStorage.getItem(key)) {
+                        localStorage.removeItem(key);
+                        output += `✅ Removido: ${key}\n`;
+                    } else {
+                        output += `⚠️  Não encontrado: ${key}\n`;
+                    }
+                });
+                
+                output += '\n✅ Limpeza concluída!';
+                result.textContent = output;
+                result.className = 'result success';
+            } catch (error) {
+                result.textContent = `❌ Erro: ${error.message}`;
+                result.className = 'result error';
+            }
+        };
+    </script>
+</body>
+</html>

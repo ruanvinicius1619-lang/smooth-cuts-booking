@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpar Agendamentos Problemáticos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .danger {
+            background-color: #dc3545;
+        }
+        .danger:hover {
+            background-color: #c82333;
+        }
+        .success {
+            background-color: #28a745;
+        }
+        .success:hover {
+            background-color: #218838;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .appointment {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .problematic {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpar Agendamentos Problemáticos</h1>
+        <p>Esta ferramenta identifica e remove agendamentos com UUIDs problemáticos que causam "Nome não configurado".</p>
+        
+        <div>
+            <button class="button" onclick="checkAppointments()">🔍 Verificar Agendamentos</button>
+            <button class="button danger" onclick="removeProblematicAppointments()">🗑️ Remover Problemáticos</button>
+            <button class="button success" onclick="showOnlyRealUsers()">✅ Mostrar Apenas Usuários Reais</button>
+            <button class="button danger" onclick="clearAllAppointments()">🚨 Limpar Todos</button>
+        </div>
+        
+        <div id="log" class="log"></div>
+        <div id="appointments"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function isValidUUID(str) {
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            return uuidRegex.test(str);
+        }
+
+        function isProblematicUUID(userId) {
+            // Lista de UUIDs problemáticos conhecidos
+            const problematicUUIDs = [
+                '3173d3c1-4c20-4d8a-a75a-9d6635932ca9',
+                '12345678-1234-1234-1234-123456789abc',
+                'test-uuid-1',
+                'test-uuid-2',
+                'test-uuid-3',
+                'test-uuid-4',
+                'test-uuid-5'
+            ];
+            
+            return problematicUUIDs.includes(userId) || 
+                   (isValidUUID(userId) && userId.startsWith('3173d3c1'));
+        }
+
+        function checkAppointments() {
+            log('🔍 Verificando agendamentos no localStorage...');
+            
+            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+            log(`📊 Total de agendamentos encontrados: ${appointments.length}`);
+            
+            const appointmentsDiv = document.getElementById('appointments');
+            appointmentsDiv.innerHTML = '<h3>📋 Agendamentos Encontrados:</h3>';
+            
+            let problematicCount = 0;
+            let realCount = 0;
+            
+            appointments.forEach((appointment, index) => {
+                const isProblematic = isProblematicUUID(appointment.user_id);
+                const div = document.createElement('div');
+                div.className = `appointment ${isProblematic ? 'problematic' : ''}`;
+                
+                div.innerHTML = `
+                    <strong>Agendamento ${index + 1}:</strong><br>
+                    📅 Data: ${appointment.date}<br>
+                    ⏰ Hora: ${appointment.time}<br>
+                    👤 User ID: ${appointment.user_id}<br>
+                    📧 Email: ${appointment.user_email || 'Não informado'}<br>
+                    📞 Telefone: ${appointment.user_phone || 'Não informado'}<br>
+                    💇 Serviço: ${appointment.service}<br>
+                    👨‍💼 Barbeiro: ${appointment.barber}<br>
+                    ${isProblematic ? '⚠️ <strong>PROBLEMÁTICO</strong>' : '✅ <strong>REAL</strong>'}
+                `;
+                
+                appointmentsDiv.appendChild(div);
+                
+                if (isProblematic) {
+                    problematicCount++;
+                } else {
+                    realCount++;
+                }
+            });
+            
+            log(`⚠️ Agendamentos problemáticos: ${problematicCount}`);
+            log(`✅ Agendamentos reais: ${realCount}`);
+        }
+
+        function removeProblematicAppointments() {
+            log('🗑️ Removendo agendamentos problemáticos...');
+            
+            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+            const originalCount = appointments.length;
+            
+            const cleanAppointments = appointments.filter(appointment => {
+                const isProblematic = isProblematicUUID(appointment.user_id);
+                if (isProblematic) {
+                    log(`🗑️ Removendo: ${appointment.user_id} - ${appointment.date} ${appointment.time}`);
+                }
+                return !isProblematic;
+            });
+            
+            localStorage.setItem('appointments', JSON.stringify(cleanAppointments));
+            
+            const removedCount = originalCount - cleanAppointments.length;
+            log(`✅ Removidos ${removedCount} agendamentos problemáticos`);
+            log(`📊 Agendamentos restantes: ${cleanAppointments.length}`);
+            
+            // Atualizar a visualização
+            checkAppointments();
+        }
+
+        function showOnlyRealUsers() {
+            log('✅ Configurando para mostrar apenas usuários reais...');
+            
+            // Primeiro, limpar agendamentos problemáticos
+            removeProblematicAppointments();
+            
+            // Verificar se há agendamentos reais restantes
+            const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+            
+            if (appointments.length === 0) {
+                log('ℹ️ Nenhum agendamento real encontrado.');
+                log('💡 Sugestão: Crie novos agendamentos com usuários reais.');
+            } else {
+                log(`✅ ${appointments.length} agendamentos reais mantidos.`);
+                log('🔄 Recarregue a página do Painel do Barbeiro para ver as mudanças.');
+            }
+        }
+
+        function clearAllAppointments() {
+            if (confirm('⚠️ Tem certeza que deseja remover TODOS os agendamentos? Esta ação não pode ser desfeita.')) {
+                localStorage.removeItem('appointments');
+                log('🚨 Todos os agendamentos foram removidos do localStorage.');
+                document.getElementById('appointments').innerHTML = '';
+            }
+        }
+
+        // Verificar automaticamente ao carregar a página
+        window.onload = function() {
+            log('🚀 Ferramenta de limpeza carregada.');
+            log('💡 Clique em "Verificar Agendamentos" para começar.');
+        };
+    </script>
+</body>
+</html>

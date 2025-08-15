@@ -11,8 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { ArrowLeft, User, Mail, Calendar, Edit2, Save, X, Clock, Scissors, CheckCircle, XCircle, Camera, Upload } from "lucide-react";
+import { ArrowLeft, User, Mail, Calendar, Edit2, Save, X, Clock, Scissors, CheckCircle, XCircle, Camera, Upload, Users, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { isBarber } from "@/config/barber";
+import { BarberAppointments } from "@/components/BarberAppointments";
+import { UserProfileManager } from "@/components/UserProfileManager";
 
 // Types for bookings
 type BookingStatus = 'pending' | 'scheduled' | 'completed' | 'cancelled' | 'no_show';
@@ -42,6 +45,13 @@ const Profile = () => {
     phone: "",
     avatar_url: ""
   });
+  
+  // Check if user is admin (specific emails)
+  const isAdmin = (email: string | undefined): boolean => {
+    if (!email) return false;
+    const adminEmails = ['admin@mateusbarber.com', 'mateus@mateusbarber.com', 'gerente@mateusbarber.com'];
+    return adminEmails.includes(email);
+  };
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -349,7 +359,7 @@ const Profile = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className={`grid w-full ${isBarber(user?.email) && isAdmin(user?.email) ? 'grid-cols-5' : isBarber(user?.email) ? 'grid-cols-4' : 'grid-cols-3'}`}>
                   <TabsTrigger value="profile" className="flex items-center gap-2">
                     <User className="w-4 h-4" />
                     Dados Pessoais
@@ -362,6 +372,18 @@ const Profile = () => {
                     <Scissors className="w-4 h-4" />
                     Histórico
                   </TabsTrigger>
+                  {isBarber(user?.email) && (
+                    <TabsTrigger value="barber" className="flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      Painel do Barbeiro
+                    </TabsTrigger>
+                  )}
+                  {isAdmin(user?.email) && (
+                    <TabsTrigger value="users" className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Gerenciar Usuários
+                    </TabsTrigger>
+                  )}
                 </TabsList>
 
                 <TabsContent value="profile" className="mt-6">
@@ -607,6 +629,31 @@ const Profile = () => {
                     </CardContent>
                   </Card>
                 </TabsContent>
+
+                {isBarber(user?.email) && (
+                  <TabsContent value="barber" className="mt-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5" />
+                          Painel do Barbeiro
+                        </CardTitle>
+                        <p className="text-muted-foreground">
+                          Acompanhe todos os agendamentos em tempo real
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <BarberAppointments barberData={null} user={user} />
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                )}
+
+                {isAdmin(user?.email) && (
+                  <TabsContent value="users" className="mt-6">
+                    <UserProfileManager isAdmin={true} />
+                  </TabsContent>
+                )}
               </Tabs>
             </div>
           </div>

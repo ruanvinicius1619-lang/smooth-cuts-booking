@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Painel do Barbeiro no Perfil</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 3px;
+        }
+        .step {
+            background-color: #e9ecef;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug - Painel do Barbeiro no Perfil</h1>
+        <p>Esta página ajuda a diagnosticar por que a aba "Painel do Barbeiro" não está aparecendo no perfil.</p>
+        
+        <div class="test-section">
+            <h3>🧪 Diagnósticos Disponíveis</h3>
+            <button onclick="checkSupabaseSession()">1. Verificar Sessão Supabase</button>
+            <button onclick="testIsBarberFunction()">2. Testar Função isBarber</button>
+            <button onclick="checkProfilePage()">3. Verificar Página de Perfil</button>
+            <button onclick="simulateBarberLogin()">4. Simular Login Barbeiro</button>
+            <button onclick="checkLocalStorage()">5. Verificar LocalStorage</button>
+            <button onclick="runFullDiagnostic()">🚀 Executar Diagnóstico Completo</button>
+            <button onclick="clearLogs()">Limpar Logs</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📋 Instruções de Teste</h3>
+            <div class="step">
+                <strong>Passo 1:</strong> Faça login com barbeiro@smoothcuts.com / 123456 em <a href="/auth" target="_blank">http://localhost:8080/auth</a>
+            </div>
+            <div class="step">
+                <strong>Passo 2:</strong> Vá para o perfil em <a href="/profile" target="_blank">http://localhost:8080/profile</a>
+            </div>
+            <div class="step">
+                <strong>Passo 3:</strong> Execute o diagnóstico completo nesta página
+            </div>
+            <div class="step">
+                <strong>Passo 4:</strong> Verifique se a aba "Painel do Barbeiro" aparece
+            </div>
+        </div>
+        
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        // Configuração dos barbeiros
+        const BARBER_CONFIG = {
+            authorizedBarbers: [
+                {
+                    id: 'default-barber',
+                    email: 'barbeiro@mateusbarber.com',
+                    name: 'Barbeiro Padrão',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'smoothcuts-barber',
+                    email: 'barbeiro@smoothcuts.com',
+                    name: 'Barbeiro SmoothCuts',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'joao-barber',
+                    email: 'joao@mateusbarber.com',
+                    name: 'João',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'pedro-barber',
+                    email: 'pedro@mateusbarber.com',
+                    name: 'Pedro',
+                    permissions: ['view_appointments']
+                }
+            ]
+        };
+
+        const isBarber = (email) => {
+            if (!email) return false;
+            return BARBER_CONFIG.authorizedBarbers.some(barber => barber.email === email);
+        };
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        function checkSupabaseSession() {
+            log('=== VERIFICANDO SESSÃO SUPABASE ===', 'info');
+            
+            // Verificar todas as chaves do localStorage relacionadas ao Supabase
+            const supabaseKeys = Object.keys(localStorage).filter(key => 
+                key.includes('supabase') || key.includes('auth')
+            );
+            
+            if (supabaseKeys.length === 0) {
+                log('❌ Nenhuma chave do Supabase encontrada no localStorage', 'error');
+                log('Isso indica que o usuário não está logado', 'warning');
+                return;
+            }
+            
+            log(`✅ Encontradas ${supabaseKeys.length} chaves do Supabase:`, 'success');
+            supabaseKeys.forEach(key => {
+                log(`- ${key}`);
+                try {
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        const parsed = JSON.parse(value);
+                        if (parsed.user && parsed.user.email) {
+                            log(`  Email do usuário: ${parsed.user.email}`, 'info');
+                            
+                            // Testar se é barbeiro
+                            const isBarbeiro = isBarber(parsed.user.email);
+                            if (isBarbeiro) {
+                                log(`  ✅ ${parsed.user.email} É um barbeiro autorizado!`, 'success');
+                            } else {
+                                log(`  ❌ ${parsed.user.email} NÃO é um barbeiro autorizado`, 'error');
+                            }
+                        }
+                    }
+                } catch (e) {
+                    log(`  Erro ao fazer parse: ${e.message}`, 'warning');
+                }
+            });
+        }
+
+        function testIsBarberFunction() {
+            log('=== TESTANDO FUNÇÃO isBarber ===', 'info');
+            
+            const testEmail = 'barbeiro@smoothcuts.com';
+            const result = isBarber(testEmail);
+            
+            log(`Testando email: ${testEmail}`);
+            log(`Resultado isBarber: ${result}`);
+            
+            if (result) {
+                log('✅ Função isBarber está funcionando corretamente!', 'success');
+            } else {
+                log('❌ Função isBarber NÃO está reconhecendo o barbeiro!', 'error');
+            }
+            
+            // Mostrar lista de barbeiros autorizados
+            log('Lista de barbeiros autorizados:');
+            BARBER_CONFIG.authorizedBarbers.forEach(barber => {
+                log(`- ${barber.email} (${barber.name})`);
+            });
+        }
+
+        function checkProfilePage() {
+            log('=== VERIFICANDO PÁGINA DE PERFIL ===', 'info');
+            
+            // Verificar se estamos na página de perfil
+            if (window.location.pathname === '/profile') {
+                log('✅ Estamos na página de perfil', 'success');
+                
+                // Verificar se as abas existem
+                const tabs = document.querySelectorAll('[role="tab"]');
+                log(`Encontradas ${tabs.length} abas:`);
+                
+                tabs.forEach((tab, index) => {
+                    const text = tab.textContent.trim();
+                    log(`  Aba ${index + 1}: ${text}`);
+                    
+                    if (text.includes('Painel do Barbeiro')) {
+                        log('  ✅ Aba "Painel do Barbeiro" encontrada!', 'success');
+                    }
+                });
+                
+                if (!Array.from(tabs).some(tab => tab.textContent.includes('Painel do Barbeiro'))) {
+                    log('❌ Aba "Painel do Barbeiro" NÃO encontrada!', 'error');
+                }
+                
+            } else {
+                log('⚠️ Não estamos na página de perfil', 'warning');
+                log(`Página atual: ${window.location.pathname}`);
+                log('Abra a página de perfil para verificar as abas');
+            }
+        }
+
+        function simulateBarberLogin() {
+            log('=== SIMULANDO LOGIN DO BARBEIRO ===', 'info');
+            
+            const mockSession = {
+                user: {
+                    id: 'mock-barber-id',
+                    email: 'barbeiro@smoothcuts.com',
+                    user_metadata: {
+                        full_name: 'Barbeiro SmoothCuts'
+                    }
+                }
+            };
+            
+            log('Simulando sessão do barbeiro:');
+            log(`<pre>${JSON.stringify(mockSession, null, 2)}</pre>`);
+            
+            // Testar se a aba deveria aparecer
+            const shouldShowTab = isBarber(mockSession.user.email);
+            log(`isBarber(${mockSession.user.email}): ${shouldShowTab}`);
+            
+            if (shouldShowTab) {
+                log('✅ Com esta sessão, a aba "Painel do Barbeiro" DEVERIA aparecer!', 'success');
+            } else {
+                log('❌ Com esta sessão, a aba "Painel do Barbeiro" NÃO apareceria!', 'error');
+            }
+        }
+
+        function checkLocalStorage() {
+            log('=== VERIFICANDO LOCALSTORAGE ===', 'info');
+            
+            const allKeys = Object.keys(localStorage);
+            log(`Total de chaves no localStorage: ${allKeys.length}`);
+            
+            // Agrupar chaves por tipo
+            const supabaseKeys = allKeys.filter(k => k.includes('supabase'));
+            const authKeys = allKeys.filter(k => k.includes('auth'));
+            const otherKeys = allKeys.filter(k => !k.includes('supabase') && !k.includes('auth'));
+            
+            if (supabaseKeys.length > 0) {
+                log(`Chaves do Supabase (${supabaseKeys.length}):`);
+                supabaseKeys.forEach(key => log(`  - ${key}`));
+            }
+            
+            if (authKeys.length > 0) {
+                log(`Chaves de Auth (${authKeys.length}):`);
+                authKeys.forEach(key => log(`  - ${key}`));
+            }
+            
+            if (otherKeys.length > 0) {
+                log(`Outras chaves (${otherKeys.length}):`);
+                otherKeys.forEach(key => log(`  - ${key}`));
+            }
+            
+            // Verificar especificamente a chave de sessão do Supabase
+            const sessionKey = supabaseKeys.find(k => k.includes('auth.token') || k.includes('session'));
+            if (sessionKey) {
+                log(`Verificando chave de sessão: ${sessionKey}`);
+                try {
+                    const sessionData = JSON.parse(localStorage.getItem(sessionKey));
+                    if (sessionData && sessionData.user) {
+                        log(`Email na sessão: ${sessionData.user.email}`);
+                        log(`ID do usuário: ${sessionData.user.id}`);
+                    }
+                } catch (e) {
+                    log(`Erro ao ler sessão: ${e.message}`, 'error');
+                }
+            }
+        }
+
+        function runFullDiagnostic() {
+            log('🚀 EXECUTANDO DIAGNÓSTICO COMPLETO', 'info');
+            log('='.repeat(50));
+            
+            checkSupabaseSession();
+            log('');
+            testIsBarberFunction();
+            log('');
+            checkProfilePage();
+            log('');
+            checkLocalStorage();
+            log('');
+            
+            log('='.repeat(50));
+            log('✅ DIAGNÓSTICO COMPLETO FINALIZADO', 'success');
+            
+            // Resumo final
+            log('📊 RESUMO:', 'info');
+            log('1. Verifique se há uma sessão ativa do Supabase');
+            log('2. Confirme que o email barbeiro@smoothcuts.com está na sessão');
+            log('3. Verifique se a função isBarber retorna true para este email');
+            log('4. Se tudo estiver correto, a aba deveria aparecer na página de perfil');
+        }
+
+        // Auto-executar diagnóstico ao carregar
+        window.onload = function() {
+            log('🔍 Página de debug carregada', 'info');
+            log('Execute o diagnóstico completo para verificar o problema');
+        };
+    </script>
+</body>
+</html>

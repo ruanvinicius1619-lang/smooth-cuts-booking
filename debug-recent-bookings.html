@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Agendamentos Recentes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .appointment {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+        .appointment.recent {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug - Agendamentos Recentes</h1>
+    
+    <div class="container">
+        <h2>Verificação de Agendamentos</h2>
+        <button class="button" onclick="checkLocalStorage()">Verificar localStorage</button>
+        <button class="button" onclick="checkSupabase()">Verificar Supabase</button>
+        <button class="button" onclick="checkRecentBookings()">Verificar Agendamentos Recentes</button>
+        <button class="button" onclick="simulateBarberPanel()">Simular Painel do Barbeiro</button>
+        <button class="button" onclick="clearResults()">Limpar Resultados</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://ixqhqfqxqxqxqxqx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4cWhxZnF4cXhxeHF4cXgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNDU0NzIwMCwiZXhwIjoyMDUwMTIzMjAwfQ.placeholder';
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `container ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function checkLocalStorage() {
+            log('🔍 Verificando localStorage...', 'info');
+            
+            try {
+                const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+                
+                log(`📊 Total de agendamentos no localStorage: ${userBookings.length}`, 'info');
+                
+                if (userBookings.length === 0) {
+                    log('⚠️ Nenhum agendamento encontrado no localStorage', 'warning');
+                    return;
+                }
+                
+                // Mostrar agendamentos recentes (últimas 24 horas)
+                const now = new Date();
+                const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                
+                const recentBookings = userBookings.filter(booking => {
+                    const createdAt = new Date(booking.created_at);
+                    return createdAt > yesterday;
+                });
+                
+                log(`🕒 Agendamentos das últimas 24h: ${recentBookings.length}`, recentBookings.length > 0 ? 'success' : 'warning');
+                
+                userBookings.forEach((booking, index) => {
+                    const isRecent = new Date(booking.created_at) > yesterday;
+                    const appointmentHtml = `
+                        <div class="appointment ${isRecent ? 'recent' : ''}">
+                            <strong>Agendamento ${index + 1} ${isRecent ? '(RECENTE)' : ''}</strong><br>
+                            ID: ${booking.id}<br>
+                            Data: ${booking.booking_date} às ${booking.booking_time}<br>
+                            Cliente: ${booking.user_name || booking.user_email || booking.user_id}<br>
+                            Email: ${booking.user_email || 'N/A'}<br>
+                            Barbeiro: ${booking.barber_name || 'N/A'}<br>
+                            Serviço: ${booking.service_name || 'N/A'}<br>
+                            Status: ${booking.status}<br>
+                            Criado em: ${new Date(booking.created_at).toLocaleString()}<br>
+                            User ID: ${booking.user_id}
+                        </div>
+                    `;
+                    log(appointmentHtml, isRecent ? 'success' : 'info');
+                });
+                
+            } catch (error) {
+                log(`❌ Erro ao verificar localStorage: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkSupabase() {
+            log('🔍 Verificando Supabase...', 'info');
+            
+            try {
+                // Simular chamada para Supabase (substitua pela URL real)
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/bookings?select=*,services(name,price,duration),barbers(name)&order=created_at.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const bookings = await response.json();
+                
+                log(`📊 Total de agendamentos no Supabase: ${bookings.length}`, 'info');
+                
+                if (bookings.length === 0) {
+                    log('⚠️ Nenhum agendamento encontrado no Supabase', 'warning');
+                    return;
+                }
+                
+                // Mostrar agendamentos recentes
+                const now = new Date();
+                const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                
+                const recentBookings = bookings.filter(booking => {
+                    const createdAt = new Date(booking.created_at);
+                    return createdAt > yesterday;
+                });
+                
+                log(`🕒 Agendamentos das últimas 24h no Supabase: ${recentBookings.length}`, recentBookings.length > 0 ? 'success' : 'warning');
+                
+                bookings.slice(0, 10).forEach((booking, index) => {
+                    const isRecent = new Date(booking.created_at) > yesterday;
+                    const appointmentHtml = `
+                        <div class="appointment ${isRecent ? 'recent' : ''}">
+                            <strong>Supabase Agendamento ${index + 1} ${isRecent ? '(RECENTE)' : ''}</strong><br>
+                            ID: ${booking.id}<br>
+                            Data: ${booking.booking_date} às ${booking.booking_time}<br>
+                            User ID: ${booking.user_id}<br>
+                            Barbeiro: ${booking.barbers?.name || 'N/A'}<br>
+                            Serviço: ${booking.services?.name || 'N/A'}<br>
+                            Status: ${booking.status}<br>
+                            Criado em: ${new Date(booking.created_at).toLocaleString()}
+                        </div>
+                    `;
+                    log(appointmentHtml, isRecent ? 'success' : 'info');
+                });
+                
+            } catch (error) {
+                log(`❌ Erro ao verificar Supabase: ${error.message}`, 'error');
+                log('💡 Verifique se as credenciais do Supabase estão corretas', 'warning');
+            }
+        }
+
+        function checkRecentBookings() {
+            log('🔍 Verificando agendamentos recentes em ambas as fontes...', 'info');
+            
+            // Verificar localStorage
+            const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            
+            const recentLocalBookings = userBookings.filter(booking => {
+                const createdAt = new Date(booking.created_at);
+                return createdAt > yesterday;
+            });
+            
+            log(`📱 Agendamentos recentes no localStorage: ${recentLocalBookings.length}`, 'info');
+            
+            if (recentLocalBookings.length > 0) {
+                recentLocalBookings.forEach(booking => {
+                    log(`✅ Local: ${booking.user_name || booking.user_email} - ${booking.booking_date} ${booking.booking_time}`, 'success');
+                });
+            }
+            
+            // Nota sobre Supabase
+            log('💡 Para verificar Supabase, clique no botão "Verificar Supabase" acima', 'info');
+        }
+
+        async function simulateBarberPanel() {
+            log('🎭 Simulando lógica do Painel do Barbeiro...', 'info');
+            
+            try {
+                // Simular a mesma lógica do BarberAppointments.tsx
+                const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+                
+                // Converter dados do localStorage para o formato esperado
+                const localAppointments = userBookings.map((booking) => ({
+                    id: booking.id,
+                    booking_date: booking.booking_date,
+                    booking_time: booking.booking_time,
+                    status: booking.status,
+                    notes: booking.notes,
+                    created_at: booking.created_at,
+                    user_id: booking.user_id,
+                    services: { 
+                        name: booking.service_name, 
+                        price: booking.service_price,
+                        duration: null 
+                    },
+                    barbers: { 
+                        name: booking.barber_name 
+                    },
+                    user_email: booking.user_email || booking.user_id,
+                    user_name: booking.user_name || 'Nome não configurado',
+                    user_phone: booking.user_phone || 'Telefone não configurado'
+                }));
+                
+                log(`📊 Agendamentos processados: ${localAppointments.length}`, 'info');
+                
+                // Aplicar filtros como no componente real
+                const adminEmails = [
+                    'admin@mateusbarber.com',
+                    'mateus@mateusbarber.com', 
+                    'gerente@mateusbarber.com',
+                    'barbeiro@smoothcuts.com'
+                ];
+                
+                const problematicUUIDs = [
+                    '3173d3c1-4c20-4d8a-a75a-9d6635932ca9',
+                    '12345678-1234-1234-1234-123456789abc',
+                    'test-uuid-1',
+                    'test-uuid-2',
+                    'test-uuid-3',
+                    'test-uuid-4',
+                    'test-uuid-5'
+                ];
+                
+                const filteredAppointments = localAppointments.filter((appointment) => {
+                    // Filtrar emails administrativos
+                    if (adminEmails.includes(appointment.user_email)) {
+                        log(`🗑️ Filtrado por email admin: ${appointment.user_email}`, 'warning');
+                        return false;
+                    }
+                    
+                    // Filtrar UUIDs problemáticos
+                    if (problematicUUIDs.includes(appointment.user_id)) {
+                        log(`🗑️ Filtrado por UUID problemático: ${appointment.user_id}`, 'warning');
+                        return false;
+                    }
+                    
+                    // Filtrar agendamentos sem dados válidos
+                    if (appointment.user_name === 'Nome não configurado' && appointment.user_phone === 'Telefone não configurado') {
+                        log(`🗑️ Filtrado por dados inválidos: ${appointment.user_id}`, 'warning');
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                log(`✅ Agendamentos que apareceriam no painel: ${filteredAppointments.length}`, filteredAppointments.length > 0 ? 'success' : 'error');
+                
+                if (filteredAppointments.length > 0) {
+                    filteredAppointments.forEach((appointment, index) => {
+                        const appointmentHtml = `
+                            <div class="appointment recent">
+                                <strong>✅ Agendamento Válido ${index + 1}</strong><br>
+                                Cliente: ${appointment.user_name}<br>
+                                Email: ${appointment.user_email}<br>
+                                Data: ${appointment.booking_date} às ${appointment.booking_time}<br>
+                                Barbeiro: ${appointment.barbers?.name}<br>
+                                Serviço: ${appointment.services?.name}<br>
+                                Status: ${appointment.status}
+                            </div>
+                        `;
+                        log(appointmentHtml, 'success');
+                    });
+                } else {
+                    log('❌ Nenhum agendamento válido encontrado para exibir no painel', 'error');
+                    log('💡 Possíveis causas:', 'info');
+                    log('- Agendamentos foram filtrados por email administrativo', 'info');
+                    log('- Agendamentos foram filtrados por UUID problemático', 'info');
+                    log('- Agendamentos não têm dados de perfil válidos', 'info');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro na simulação: ${error.message}`, 'error');
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Executar verificação inicial
+        window.onload = function() {
+            log('🚀 Debug de Agendamentos Recentes iniciado', 'info');
+            log('💡 Use os botões acima para verificar diferentes aspectos dos agendamentos', 'info');
+        };
+    </script>
+</body>
+</html>

@@ -184,7 +184,7 @@ const ChatBot: React.FC = () => {
     try {
       const aiResponse = await generateAIRecommendations(customerProfile, services.map(service => ({
         ...service,
-        duration_minutes: service.duration // Map duration to duration_minutes
+        duration: service.duration
       })));
       
       const recommendationMessage: Message = {
@@ -262,7 +262,7 @@ const ChatBot: React.FC = () => {
               customerProfile,
               services: services.map(service => ({
                 ...service,
-                duration_minutes: service.duration
+                duration: service.duration
               })),
               conversationHistory: messages.map(m => m.text)
             });
@@ -272,7 +272,7 @@ const ChatBot: React.FC = () => {
               customerProfile,
               services: services.map(service => ({
                 ...service,
-                duration_minutes: service.duration
+                duration: service.duration
               })),
               conversationHistory: messages.map(m => m.text)
             });
@@ -338,7 +338,7 @@ const ChatBot: React.FC = () => {
         customerProfile,
         services: services.map(service => ({
           ...service,
-          duration_minutes: service.duration
+          duration: service.duration
         })),
         conversationHistory: messages.map(m => m.text)
       });
@@ -409,7 +409,7 @@ const ChatBot: React.FC = () => {
          customerProfile,
          services: services.map(service => ({
            ...service,
-           duration_minutes: service.duration
+           duration: service.duration
          })),
          conversationHistory: messages.map(m => m.text)
        });

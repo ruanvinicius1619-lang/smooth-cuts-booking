@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Sessão do Navegador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        button.danger:hover {
+            background-color: #c82333;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .log {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 3px;
+        }
+        .step {
+            background-color: #e9ecef;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+        .status {
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .credentials {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste de Sessão do Navegador</h1>
+        <p>Esta página testa se o usuário barbeiro está logado corretamente no navegador.</p>
+        
+        <div class="test-section">
+            <h3>📊 Status Atual</h3>
+            <div id="status-display"></div>
+            <button onclick="checkSession()">🔄 Verificar Sessão</button>
+            <button onclick="clearSession()" class="danger">🗑️ Limpar Sessão</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔐 Login Manual</h3>
+            <div class="credentials">
+                <strong>Credenciais do Barbeiro:</strong><br>
+                Email: <code>barbeiro@smoothcuts.com</code><br>
+                Senha: <code>123456</code>
+            </div>
+            <button onclick="loginBarber()">🔑 Fazer Login como Barbeiro</button>
+            <button onclick="logout()">🚪 Fazer Logout</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 Testes</h3>
+            <button onclick="testIsBarberFunction()">🔍 Testar Função isBarber</button>
+            <button onclick="checkProfilePage()">👤 Verificar Página de Perfil</button>
+            <button onclick="runFullTest()">🚀 Teste Completo</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔗 Links Rápidos</h3>
+            <button onclick="window.open('/auth', '_blank')">🔐 Página de Login</button>
+            <button onclick="window.open('/profile', '_blank')">👤 Página de Perfil</button>
+        </div>
+        
+        <div id="logs"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        // Configuração do Supabase
+        const supabaseUrl = 'https://jheywkeofcttgdgquawm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXl3a2VvZmN0dGdkZ3F1YXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxMjc2MjAsImV4cCI6MjA3MDcwMzYyMH0.6vOdNR1-h0ac_STZFp4ITuI8p5fjEVlnZkUT2hSxKX0';
+        
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        // Configuração dos barbeiros
+        const BARBER_CONFIG = {
+            authorizedBarbers: [
+                {
+                    id: 'default-barber',
+                    email: 'barbeiro@mateusbarber.com',
+                    name: 'Barbeiro Padrão',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'smoothcuts-barber',
+                    email: 'barbeiro@smoothcuts.com',
+                    name: 'Barbeiro SmoothCuts',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'joao-barber',
+                    email: 'joao@mateusbarber.com',
+                    name: 'João',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'pedro-barber',
+                    email: 'pedro@mateusbarber.com',
+                    name: 'Pedro',
+                    permissions: ['view_appointments']
+                }
+            ]
+        };
+
+        const isBarber = (email) => {
+            if (!email) return false;
+            return BARBER_CONFIG.authorizedBarbers.some(barber => barber.email === email);
+        };
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status-display');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function checkSession() {
+            log('=== VERIFICANDO SESSÃO ATUAL ===', 'info');
+            
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    log(`❌ Erro ao verificar sessão: ${error.message}`, 'error');
+                    updateStatus('❌ Erro ao verificar sessão', 'error');
+                    return;
+                }
+                
+                if (session && session.user) {
+                    const user = session.user;
+                    log(`✅ Usuário logado: ${user.email}`, 'success');
+                    log(`   ID: ${user.id}`);
+                    log(`   Confirmado: ${user.email_confirmed_at ? 'Sim' : 'Não'}`);
+                    
+                    // Verificar se é barbeiro
+                    const isBarbeiro = isBarber(user.email);
+                    if (isBarbeiro) {
+                        log(`✅ ${user.email} É um barbeiro autorizado!`, 'success');
+                        updateStatus(`✅ Logado como barbeiro: ${user.email}`, 'success');
+                    } else {
+                        log(`❌ ${user.email} NÃO é um barbeiro autorizado`, 'error');
+                        updateStatus(`⚠️ Logado como usuário comum: ${user.email}`, 'warning');
+                    }
+                } else {
+                    log('❌ Nenhum usuário logado', 'error');
+                    updateStatus('❌ Nenhum usuário logado', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+                updateStatus('❌ Erro ao verificar sessão', 'error');
+            }
+        }
+
+        async function loginBarber() {
+            log('=== FAZENDO LOGIN COMO BARBEIRO ===', 'info');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'barbeiro@smoothcuts.com',
+                    password: '123456'
+                });
+                
+                if (error) {
+                    log(`❌ Erro no login: ${error.message}`, 'error');
+                    updateStatus('❌ Erro no login', 'error');
+                    return;
+                }
+                
+                log('✅ Login realizado com sucesso!', 'success');
+                log(`   Email: ${data.user.email}`);
+                log(`   ID: ${data.user.id}`);
+                
+                updateStatus(`✅ Login realizado: ${data.user.email}`, 'success');
+                
+                // Verificar automaticamente a sessão após login
+                setTimeout(checkSession, 1000);
+                
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+                updateStatus('❌ Erro no login', 'error');
+            }
+        }
+
+        async function logout() {
+            log('=== FAZENDO LOGOUT ===', 'info');
+            
+            try {
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    log(`❌ Erro no logout: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log('✅ Logout realizado com sucesso!', 'success');
+                updateStatus('✅ Logout realizado', 'success');
+                
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        function clearSession() {
+            log('=== LIMPANDO SESSÃO ===', 'info');
+            
+            // Limpar localStorage
+            const supabaseKeys = Object.keys(localStorage).filter(key => 
+                key.includes('supabase') || key.includes('auth')
+            );
+            
+            supabaseKeys.forEach(key => {
+                localStorage.removeItem(key);
+                log(`🗑️ Removido: ${key}`);
+            });
+            
+            log('✅ Sessão limpa!', 'success');
+            updateStatus('✅ Sessão limpa', 'success');
+        }
+
+        function testIsBarberFunction() {
+            log('=== TESTANDO FUNÇÃO isBarber ===', 'info');
+            
+            const testEmails = [
+                'barbeiro@smoothcuts.com',
+                'barbeiro@mateusbarber.com',
+                'joao@mateusbarber.com',
+                'pedro@mateusbarber.com',
+                'usuario@normal.com'
+            ];
+            
+            testEmails.forEach(email => {
+                const result = isBarber(email);
+                if (result) {
+                    log(`✅ ${email} → É barbeiro`, 'success');
+                } else {
+                    log(`❌ ${email} → NÃO é barbeiro`);
+                }
+            });
+        }
+
+        function checkProfilePage() {
+            log('=== VERIFICANDO PÁGINA DE PERFIL ===', 'info');
+            
+            if (window.location.pathname === '/profile') {
+                log('✅ Estamos na página de perfil', 'success');
+                
+                setTimeout(() => {
+                    const tabs = document.querySelectorAll('[role="tab"]');
+                    log(`Encontradas ${tabs.length} abas:`);
+                    
+                    tabs.forEach((tab, index) => {
+                        const text = tab.textContent.trim();
+                        log(`  Aba ${index + 1}: "${text}"`);
+                        
+                        if (text.includes('Painel do Barbeiro')) {
+                            log('  ✅ Aba "Painel do Barbeiro" encontrada!', 'success');
+                        }
+                    });
+                    
+                    const barberTab = document.querySelector('[value="barber"]');
+                    if (barberTab) {
+                        log('✅ Elemento da aba do barbeiro encontrado!', 'success');
+                    } else {
+                        log('❌ Elemento da aba do barbeiro NÃO encontrado!', 'error');
+                    }
+                }, 1000);
+            } else {
+                log('⚠️ Não estamos na página de perfil', 'warning');
+                log('Abra a página /profile para verificar as abas');
+            }
+        }
+
+        async function runFullTest() {
+            log('🚀 EXECUTANDO TESTE COMPLETO', 'info');
+            log('='.repeat(50));
+            
+            await checkSession();
+            log('');
+            testIsBarberFunction();
+            log('');
+            checkProfilePage();
+            log('');
+            
+            log('='.repeat(50));
+            log('✅ TESTE COMPLETO FINALIZADO', 'success');
+        }
+
+        // Disponibilizar funções globalmente
+        window.checkSession = checkSession;
+        window.loginBarber = loginBarber;
+        window.logout = logout;
+        window.clearSession = clearSession;
+        window.testIsBarberFunction = testIsBarberFunction;
+        window.checkProfilePage = checkProfilePage;
+        window.runFullTest = runFullTest;
+
+        // Auto-executar verificação ao carregar
+        window.onload = function() {
+            log('🔍 Página de teste carregada', 'info');
+            checkSession();
+        };
+    </script>
+</body>
+</html>

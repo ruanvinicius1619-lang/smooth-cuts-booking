@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Agendamentos Egrinaldo</title>
+</head>
+<body>
+    <h1>Debug Agendamentos do Egrinaldo</h1>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        // Verificar localStorage
+        const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+        
+        output.innerHTML += `<h2>Total de agendamentos no localStorage: ${userBookings.length}</h2>`;
+        
+        // Filtrar agendamentos do Egrinaldo
+        const egrinaldoBookings = userBookings.filter(booking => 
+            booking.user_id === 'egrinaldo19@gmail.com' || 
+            booking.user_email === 'egrinaldo19@gmail.com'
+        );
+        
+        output.innerHTML += `<h2>Agendamentos do Egrinaldo: ${egrinaldoBookings.length}</h2>`;
+        
+        if (egrinaldoBookings.length > 0) {
+            output.innerHTML += '<h3>Detalhes dos agendamentos:</h3>';
+            egrinaldoBookings.forEach((booking, index) => {
+                output.innerHTML += `
+                    <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                        <h4>Agendamento ${index + 1}</h4>
+                        <p><strong>ID:</strong> ${booking.id}</p>
+                        <p><strong>User ID:</strong> ${booking.user_id}</p>
+                        <p><strong>Data:</strong> ${booking.booking_date}</p>
+                        <p><strong>Hora:</strong> ${booking.booking_time}</p>
+                        <p><strong>Serviço:</strong> ${booking.service_name}</p>
+                        <p><strong>Barbeiro:</strong> ${booking.barber_name}</p>
+                        <p><strong>Status:</strong> ${booking.status}</p>
+                        <p><strong>Preço:</strong> R$ ${booking.service_price}</p>
+                    </div>
+                `;
+            });
+        } else {
+            output.innerHTML += '<p style="color: red;">Nenhum agendamento encontrado para egrinaldo19@gmail.com</p>';
+        }
+        
+        // Mostrar todos os agendamentos para debug
+        output.innerHTML += '<h2>Todos os agendamentos (primeiros 5):</h2>';
+        userBookings.slice(0, 5).forEach((booking, index) => {
+            output.innerHTML += `
+                <div style="border: 1px solid #eee; margin: 5px; padding: 5px; font-size: 12px;">
+                    <p><strong>ID:</strong> ${booking.id}</p>
+                    <p><strong>User ID:</strong> ${booking.user_id}</p>
+                    <p><strong>Data:</strong> ${booking.booking_date}</p>
+                    <p><strong>Serviço:</strong> ${booking.service_name}</p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

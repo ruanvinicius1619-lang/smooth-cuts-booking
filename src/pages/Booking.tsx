@@ -20,12 +20,14 @@ import {
 } from "lucide-react";
 import { getServices, getBarbers } from "@/config/admin";
 import { useAdminData } from "@/hooks/useAdminData";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 const Booking = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { services, barbers } = useAdminData();
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const { profile, loading: profileLoading, createOrUpdateProfile } = useUserProfile(user);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedService, setSelectedService] = useState<string>("");
@@ -138,6 +140,11 @@ const Booking = () => {
       return;
     }
     
+    // Garantir que o perfil do usuário existe antes de criar o agendamento
+    console.log('DEBUG: Verificando/criando perfil do usuário...');
+    const userProfile = await createOrUpdateProfile(user);
+    console.log('DEBUG: Perfil do usuário:', userProfile);
+    
     if (!selectedService || !selectedBarber || !selectedDate || !selectedTime) {
       toast({
         title: "Dados incompletos",
@@ -189,23 +196,46 @@ const Booking = () => {
       
       console.log('DEBUG: Dados do agendamento:', bookingData);
       
-      // Create booking locally (without database dependency)
-      const bookingId = `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Try to save to Supabase first
+      let savedBooking = null;
+      try {
+        const { data: supabaseBooking, error: supabaseError } = await supabase
+          .from('bookings')
+          .insert([bookingData])
+          .select()
+          .single();
+        
+        if (supabaseError) {
+          console.warn('Erro ao salvar no Supabase:', supabaseError);
+        } else {
+          savedBooking = supabaseBooking;
+          console.log('DEBUG: Agendamento salvo no Supabase:', savedBooking);
+        }
+      } catch (supabaseError) {
+        console.warn('Erro de conexão com Supabase:', supabaseError);
+      }
+      
+      // Create booking locally as backup or if Supabase failed
+      const bookingId = savedBooking?.id || `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const localBooking = {
         id: bookingId,
         ...bookingData,
-        created_at: new Date().toISOString(),
+        created_at: savedBooking?.created_at || new Date().toISOString(),
         service_name: selectedServiceData.name,
         service_price: selectedServiceData.price,
         barber_name: barbers.find(b => b.id === selectedBarber)?.name || 'Barbeiro'
       };
       
-      // Store booking in localStorage
+      // Store booking in localStorage (as backup or primary if Supabase failed)
       const allBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
       allBookings.push(localBooking);
       localStorage.setItem('userBookings', JSON.stringify(allBookings));
       
-      console.log('DEBUG: Agendamento criado localmente:', localBooking);
+      console.log('DEBUG: Agendamento criado:', {
+        supabase: !!savedBooking,
+        localStorage: true,
+        booking: localBooking
+      });
       
       toast({
         title: "Agendamento confirmado!",

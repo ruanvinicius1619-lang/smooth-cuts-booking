@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Limpeza e Teste - localStorage</title>
+    <title>Limpar localStorage - Agendamentos Fake</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,288 +14,297 @@
         }
         .container {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
         }
         .section {
             margin: 20px 0;
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            background-color: #f9f9f9;
         }
-        .error { background-color: #fee; border-color: #fcc; }
-        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
-        .success { background-color: #d4edda; border-color: #c3e6cb; }
-        .info { background-color: #e7f3ff; border-color: #b3d9ff; }
-        button {
-            background: #007bff;
+        .button {
+            background-color: #007bff;
             color: white;
+            padding: 10px 20px;
             border: none;
-            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
             margin: 5px;
+            font-size: 14px;
         }
-        button:hover { background: #0056b3; }
-        .danger { background: #dc3545; }
-        .danger:hover { background: #c82333; }
-        pre {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 3px;
-            overflow-x: auto;
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .button.danger {
+            background-color: #dc3545;
+        }
+        .button.danger:hover {
+            background-color: #c82333;
+        }
+        .button.success {
+            background-color: #28a745;
+        }
+        .button.success:hover {
+            background-color: #218838;
+        }
+        .output {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
             white-space: pre-wrap;
             max-height: 300px;
             overflow-y: auto;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧹 Limpeza e Teste - localStorage</h1>
-        <p>Ferramenta para limpar completamente o localStorage e testar se isso resolve o problema do UUID "barba".</p>
+        <h1>🧹 Limpar localStorage - Agendamentos Fake</h1>
         
-        <div class="section info">
-            <h3>📋 Estado Atual do localStorage</h3>
-            <div id="currentState"></div>
-            <button onclick="checkCurrentState()">Verificar Estado Atual</button>
-        </div>
-        
-        <div class="section warning">
-            <h3>⚠️ Limpeza Completa</h3>
-            <p><strong>ATENÇÃO:</strong> Isso irá remover TODOS os dados do localStorage, incluindo agendamentos, configurações e dados de admin.</p>
-            <button class="danger" onclick="clearAllLocalStorage()">Limpar TUDO do localStorage</button>
-            <button onclick="clearOnlyBookings()">Limpar Apenas Agendamentos</button>
+        <div class="section">
+            <h3>📋 1. Verificar Agendamentos Atuais</h3>
+            <button class="button" onclick="checkCurrentBookings()">Verificar localStorage</button>
+            <div id="current-bookings" class="output"></div>
         </div>
         
         <div class="section">
-            <h3>🔄 Reinicialização</h3>
-            <button onclick="reinitializeData()">Reinicializar Dados Padrão</button>
-            <button onclick="reloadApplication()">Recarregar Aplicação</button>
+            <h3>🔍 2. Identificar Agendamentos Fake</h3>
+            <button class="button" onclick="identifyFakeBookings()">Identificar Fake</button>
+            <div id="fake-bookings" class="output"></div>
         </div>
         
         <div class="section">
-            <h3>🧪 Teste Pós-Limpeza</h3>
-            <button onclick="testAfterCleanup()">Testar Após Limpeza</button>
-            <button onclick="simulateBookingProcess()">Simular Processo de Agendamento</button>
+            <h3>🗑️ 3. Limpar Agendamentos Fake</h3>
+            <div class="warning">
+                ⚠️ <strong>Atenção:</strong> Esta ação irá remover agendamentos com UUIDs fake ou dados de teste do localStorage.
+            </div>
+            <button class="button danger" onclick="clearFakeBookings()">Limpar Agendamentos Fake</button>
+            <button class="button danger" onclick="clearAllBookings()">Limpar TODOS os Agendamentos</button>
+            <div id="clear-result" class="output"></div>
         </div>
         
         <div class="section">
-            <h3>📊 Logs de Teste</h3>
-            <div id="testLogs"></div>
+            <h3>✅ 4. Verificar Resultado</h3>
+            <button class="button success" onclick="verifyCleanup()">Verificar Limpeza</button>
+            <div id="verify-result" class="output"></div>
         </div>
     </div>
 
     <script>
-        function log(message, type = 'info') {
-            const logs = document.getElementById('testLogs');
-            const div = document.createElement('div');
-            div.className = `section ${type}`;
-            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
-            logs.appendChild(div);
-            logs.scrollTop = logs.scrollHeight;
-        }
-
-        function checkCurrentState() {
-            const state = document.getElementById('currentState');
-            const keys = Object.keys(localStorage);
+        function checkCurrentBookings() {
+            const output = document.getElementById('current-bookings');
             
-            if (keys.length === 0) {
-                state.innerHTML = '<p class="success">✅ localStorage está vazio</p>';
-                return;
-            }
-            
-            let html = '<h4>Chaves encontradas:</h4><ul>';
-            let hasProblems = false;
-            
-            keys.forEach(key => {
-                try {
-                    const value = localStorage.getItem(key);
-                    const parsed = JSON.parse(value);
-                    
-                    html += `<li><strong>${key}:</strong> ${Array.isArray(parsed) ? parsed.length + ' itens' : typeof parsed}</li>`;
-                    
-                    // Verificar problemas específicos
-                    if (key === 'userBookings' && Array.isArray(parsed)) {
-                        const invalidBookings = parsed.filter(b => b.barber_id === 'barba');
-                        if (invalidBookings.length > 0) {
-                            html += `<li class="error">🚨 ${invalidBookings.length} agendamentos com barber_id 'barba' encontrados!</li>`;
-                            hasProblems = true;
-                        }
-                    }
-                    
-                    if (key === 'adminBarbers' && Array.isArray(parsed)) {
-                        const invalidBarbers = parsed.filter(b => b.id === 'barba');
-                        if (invalidBarbers.length > 0) {
-                            html += `<li class="error">🚨 Barbeiro com ID 'barba' encontrado!</li>`;
-                            hasProblems = true;
-                        }
-                    }
-                } catch (e) {
-                    html += `<li class="error"><strong>${key}:</strong> Erro de parsing</li>`;
-                    hasProblems = true;
-                }
-            });
-            
-            html += '</ul>';
-            
-            if (hasProblems) {
-                html += '<p class="error">❌ Problemas detectados no localStorage!</p>';
-            } else {
-                html += '<p class="success">✅ Nenhum problema detectado</p>';
-            }
-            
-            state.innerHTML = html;
-            log('Estado atual verificado');
-        }
-
-        function clearAllLocalStorage() {
-            if (!confirm('ATENÇÃO: Isso irá remover TODOS os dados do localStorage. Continuar?')) {
-                return;
-            }
-            
-            const keysBefore = Object.keys(localStorage).length;
-            localStorage.clear();
-            const keysAfter = Object.keys(localStorage).length;
-            
-            log(`🧹 localStorage limpo completamente. ${keysBefore} chaves removidas.`, 'warning');
-            checkCurrentState();
-        }
-
-        function clearOnlyBookings() {
-            if (!confirm('Remover apenas os agendamentos do localStorage?')) {
-                return;
-            }
-            
-            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
-            const bookingsCount = bookings.length;
-            
-            localStorage.removeItem('userBookings');
-            
-            log(`🧹 ${bookingsCount} agendamentos removidos do localStorage`, 'warning');
-            checkCurrentState();
-        }
-
-        function reinitializeData() {
-            log('🔄 Reinicializando dados padrão...', 'info');
-            
-            // Dados padrão de serviços
-            const defaultServices = [
-                { id: "corte-simples", name: "Corte Simples", price: 30, duration: "30min", description: "Corte básico de cabelo" },
-                { id: "corte-barba", name: "Corte + Barba", price: 50, duration: "40min", description: "Combo completo de corte e barba" },
-                { id: "barba", name: "Barba", price: 25, duration: "20min", description: "Aparar e modelar a barba" }
-            ];
-            
-            // Dados padrão de barbeiros
-            const defaultBarbers = [
-                { id: "carlos", name: "Carlos Silva", specialty: "Cortes clássicos", email: "carlos@barbershop.com", phone: "(11) 98888-8888" },
-                { id: "joao", name: "João Santos", specialty: "Barba e bigode", email: "joao@barbershop.com", phone: "(11) 97777-7777" },
-                { id: "pedro", name: "Pedro Costa", specialty: "Cortes modernos", email: "pedro@barbershop.com", phone: "(11) 96666-6666" }
-            ];
-            
-            localStorage.setItem('adminServices', JSON.stringify(defaultServices));
-            localStorage.setItem('adminBarbers', JSON.stringify(defaultBarbers));
-            localStorage.setItem('userBookings', JSON.stringify([]));
-            
-            log('✅ Dados padrão reinicializados', 'success');
-            checkCurrentState();
-        }
-
-        function reloadApplication() {
-            log('🔄 Recarregando aplicação...', 'info');
-            setTimeout(() => {
-                window.location.href = 'http://localhost:8080/';
-            }, 1000);
-        }
-
-        function testAfterCleanup() {
-            log('=== TESTE PÓS-LIMPEZA ===', 'info');
-            
-            // Verificar se localStorage está limpo
-            const keys = Object.keys(localStorage);
-            if (keys.length === 0) {
-                log('✅ localStorage está completamente limpo', 'success');
-            } else {
-                log(`⚠️ localStorage ainda contém ${keys.length} chaves: ${keys.join(', ')}`, 'warning');
-            }
-            
-            // Verificar se há dados de agendamento
-            const bookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
-            if (bookings.length === 0) {
-                log('✅ Nenhum agendamento encontrado', 'success');
-            } else {
-                log(`⚠️ ${bookings.length} agendamentos ainda presentes`, 'warning');
+            try {
+                const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
                 
-                const invalidBookings = bookings.filter(b => b.barber_id === 'barba');
-                if (invalidBookings.length > 0) {
-                    log(`🚨 PROBLEMA PERSISTE: ${invalidBookings.length} agendamentos com barber_id 'barba'`, 'error');
+                output.textContent = `📊 Total de agendamentos no localStorage: ${bookings.length}\n\n`;
+                
+                if (bookings.length > 0) {
+                    output.textContent += '📋 Agendamentos encontrados:\n';
+                    bookings.forEach((booking, index) => {
+                        output.textContent += `\n${index + 1}. ID: ${booking.id}\n`;
+                        output.textContent += `   User ID: ${booking.user_id}\n`;
+                        output.textContent += `   Data: ${booking.date}\n`;
+                        output.textContent += `   Horário: ${booking.time}\n`;
+                        output.textContent += `   Barbeiro: ${booking.barber}\n`;
+                        output.textContent += `   Serviço: ${booking.service}\n`;
+                    });
                 } else {
-                    log('✅ Nenhum agendamento com barber_id "barba" encontrado', 'success');
+                    output.textContent += '✅ Nenhum agendamento encontrado no localStorage.';
+                }
+            } catch (error) {
+                output.textContent = `❌ Erro ao verificar agendamentos: ${error.message}`;
+            }
+        }
+        
+        function identifyFakeBookings() {
+            const output = document.getElementById('fake-bookings');
+            
+            try {
+                const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                
+                const fakeUUIDs = [
+                    '3173d3c1-4c20-4d8a-a75a-9d6635932ca9',
+                    '11111111-1111-1111-1111-111111111111',
+                    '22222222-2222-2222-2222-222222222222',
+                    '33333333-3333-3333-3333-333333333333',
+                    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+                    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+                ];
+                
+                const fakeEmails = [
+                    'usuario.uuid@exemplo.com',
+                    'teste.11111111@exemplo.com',
+                    'teste.22222222@exemplo.com',
+                    'teste.33333333@exemplo.com',
+                    'teste.aaaaaaaa@exemplo.com',
+                    'teste.bbbbbbbb@exemplo.com',
+                    'cliente@exemplo.com'
+                ];
+                
+                const fakeBookings = bookings.filter(booking => {
+                    return fakeUUIDs.includes(booking.user_id) || 
+                           fakeEmails.includes(booking.user_id) ||
+                           (booking.user_id && booking.user_id.includes('exemplo.com')) ||
+                           (booking.user_id && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(booking.user_id) && fakeUUIDs.includes(booking.user_id));
+                });
+                
+                output.textContent = `🔍 Agendamentos fake identificados: ${fakeBookings.length}\n\n`;
+                
+                if (fakeBookings.length > 0) {
+                    output.textContent += '🗑️ Agendamentos que serão removidos:\n';
+                    fakeBookings.forEach((booking, index) => {
+                        output.textContent += `\n${index + 1}. ID: ${booking.id}\n`;
+                        output.textContent += `   User ID: ${booking.user_id} (FAKE)\n`;
+                        output.textContent += `   Data: ${booking.date}\n`;
+                        output.textContent += `   Barbeiro: ${booking.barber}\n`;
+                    });
+                } else {
+                    output.textContent += '✅ Nenhum agendamento fake identificado.';
+                }
+                
+                const realBookings = bookings.filter(booking => {
+                    return !fakeUUIDs.includes(booking.user_id) && 
+                           !fakeEmails.includes(booking.user_id) &&
+                           !(booking.user_id && booking.user_id.includes('exemplo.com'));
+                });
+                
+                output.textContent += `\n\n✅ Agendamentos reais que serão mantidos: ${realBookings.length}`;
+                
+            } catch (error) {
+                output.textContent = `❌ Erro ao identificar agendamentos fake: ${error.message}`;
+            }
+        }
+        
+        function clearFakeBookings() {
+            const output = document.getElementById('clear-result');
+            
+            try {
+                const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                const originalCount = bookings.length;
+                
+                const fakeUUIDs = [
+                    '3173d3c1-4c20-4d8a-a75a-9d6635932ca9',
+                    '11111111-1111-1111-1111-111111111111',
+                    '22222222-2222-2222-2222-222222222222',
+                    '33333333-3333-3333-3333-333333333333',
+                    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+                    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+                ];
+                
+                const fakeEmails = [
+                    'usuario.uuid@exemplo.com',
+                    'teste.11111111@exemplo.com',
+                    'teste.22222222@exemplo.com',
+                    'teste.33333333@exemplo.com',
+                    'teste.aaaaaaaa@exemplo.com',
+                    'teste.bbbbbbbb@exemplo.com',
+                    'cliente@exemplo.com'
+                ];
+                
+                const realBookings = bookings.filter(booking => {
+                    return !fakeUUIDs.includes(booking.user_id) && 
+                           !fakeEmails.includes(booking.user_id) &&
+                           !(booking.user_id && booking.user_id.includes('exemplo.com'));
+                });
+                
+                localStorage.setItem('bookings', JSON.stringify(realBookings));
+                
+                const removedCount = originalCount - realBookings.length;
+                
+                output.textContent = `✅ Limpeza concluída!\n\n`;
+                output.textContent += `📊 Agendamentos originais: ${originalCount}\n`;
+                output.textContent += `🗑️ Agendamentos fake removidos: ${removedCount}\n`;
+                output.textContent += `✅ Agendamentos reais mantidos: ${realBookings.length}\n\n`;
+                
+                if (realBookings.length > 0) {
+                    output.textContent += '📋 Agendamentos restantes:\n';
+                    realBookings.forEach((booking, index) => {
+                        output.textContent += `\n${index + 1}. User ID: ${booking.user_id}\n`;
+                        output.textContent += `   Data: ${booking.date} às ${booking.time}\n`;
+                        output.textContent += `   Barbeiro: ${booking.barber}\n`;
+                    });
+                }
+                
+            } catch (error) {
+                output.textContent = `❌ Erro ao limpar agendamentos fake: ${error.message}`;
+            }
+        }
+        
+        function clearAllBookings() {
+            if (confirm('⚠️ ATENÇÃO: Isso irá remover TODOS os agendamentos do localStorage. Tem certeza?')) {
+                const output = document.getElementById('clear-result');
+                
+                try {
+                    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                    const originalCount = bookings.length;
+                    
+                    localStorage.removeItem('bookings');
+                    
+                    output.textContent = `✅ TODOS os agendamentos foram removidos!\n\n`;
+                    output.textContent += `🗑️ Total de agendamentos removidos: ${originalCount}\n`;
+                    output.textContent += `📊 localStorage limpo completamente.`;
+                    
+                } catch (error) {
+                    output.textContent = `❌ Erro ao limpar todos os agendamentos: ${error.message}`;
                 }
             }
         }
-
-        function simulateBookingProcess() {
-            log('=== SIMULAÇÃO: Processo de Agendamento ===', 'info');
+        
+        function verifyCleanup() {
+            const output = document.getElementById('verify-result');
             
-            // Verificar se há dados necessários
-            const services = JSON.parse(localStorage.getItem('adminServices') || '[]');
-            const barbers = JSON.parse(localStorage.getItem('adminBarbers') || '[]');
-            
-            if (services.length === 0 || barbers.length === 0) {
-                log('❌ Dados insuficientes. Execute "Reinicializar Dados Padrão" primeiro.', 'error');
-                return;
-            }
-            
-            // Simular seleção de serviço
-            const selectedService = services[0];
-            log(`1️⃣ Serviço selecionado: ${selectedService.id} - ${selectedService.name}`);
-            
-            // Simular seleção de barbeiro
-            const selectedBarber = barbers[0];
-            log(`2️⃣ Barbeiro selecionado: ${selectedBarber.id} - ${selectedBarber.name}`);
-            
-            // Verificar se há confusão
-            if (selectedBarber.id === 'barba') {
-                log('🚨 ERRO REPRODUZIDO: Barbeiro com ID "barba" selecionado!', 'error');
-            } else {
-                log('✅ Seleção de barbeiro válida', 'success');
-            }
-            
-            // Simular criação de agendamento
-            const bookingData = {
-                id: 'test-' + Date.now(),
-                user_id: 'test-user',
-                service_id: selectedService.id,
-                barber_id: selectedBarber.id,
-                booking_date: new Date().toISOString().split('T')[0],
-                booking_time: '10:00',
-                status: 'scheduled'
-            };
-            
-            log('3️⃣ Dados do agendamento simulado:');
-            log(`<pre>${JSON.stringify(bookingData, null, 2)}</pre>`);
-            
-            // Verificar se seria válido para Supabase
-            if (isValidUUID(bookingData.barber_id)) {
-                log('✅ barber_id é um UUID válido para Supabase', 'success');
-            } else {
-                log('❌ barber_id NÃO é um UUID válido - causaria erro no Supabase', 'error');
+            try {
+                const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                
+                output.textContent = `📊 Verificação final:\n\n`;
+                output.textContent += `✅ Total de agendamentos restantes: ${bookings.length}\n\n`;
+                
+                if (bookings.length > 0) {
+                    output.textContent += '📋 Agendamentos restantes (apenas reais):\n';
+                    bookings.forEach((booking, index) => {
+                        output.textContent += `\n${index + 1}. User ID: ${booking.user_id}\n`;
+                        output.textContent += `   Data: ${booking.date} às ${booking.time}\n`;
+                        output.textContent += `   Barbeiro: ${booking.barber}\n`;
+                        output.textContent += `   Serviço: ${booking.service}\n`;
+                    });
+                } else {
+                    output.textContent += '✅ localStorage limpo - nenhum agendamento encontrado.';
+                }
+                
+                output.textContent += '\n\n💡 Agora você pode testar o Painel do Barbeiro para confirmar que apenas dados reais aparecem.';
+                
+            } catch (error) {
+                output.textContent = `❌ Erro na verificação: ${error.message}`;
             }
         }
-
-        function isValidUUID(uuid) {
-            if (!uuid || typeof uuid !== 'string') return false;
-            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-            return uuidRegex.test(uuid);
-        }
-
-        // Inicialização
-        window.onload = function() {
-            log('🚀 Ferramenta de limpeza e teste inicializada', 'success');
-            checkCurrentState();
-        };
     </script>
 </body>
 </html>

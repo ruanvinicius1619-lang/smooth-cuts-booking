@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Criar Agendamento de Teste</title>
+</head>
+<body>
+    <h1>Criar Agendamento de Teste para Egrinaldo</h1>
+    <button onclick="createTestAppointment()">Criar Agendamento para HOJE</button>
+    <button onclick="createFutureAppointment()">Criar Agendamento para 14/08/2025</button>
+    <button onclick="clearAppointments()">Limpar Agendamentos</button>
+    <button onclick="checkAppointments()">Verificar Agendamentos</button>
+    <div id="output"></div>
+    
+    <script>
+        function createTestAppointment() {
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + 
+                           String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(today.getDate()).padStart(2, '0');
+            
+            const testAppointment = {
+                id: `booking_${Date.now()}_test_egrinaldo_today`,
+                user_id: 'egrinaldo19@gmail.com',
+                service_id: 'service_1',
+                barber_id: 'barber_1',
+                booking_date: todayStr,
+                booking_time: '18:30',
+                status: 'pending',
+                notes: 'Agendamento de teste para HOJE - Egrinaldo',
+                created_at: new Date().toISOString(),
+                service_name: 'Corte + Barba',
+                service_price: 50.00,
+                barber_name: 'João Santos'
+            };
+            
+            saveAppointment(testAppointment, 'Agendamento para HOJE criado!');
+        }
+        
+        function createFutureAppointment() {
+            const testAppointment = {
+                id: `booking_${Date.now()}_test_egrinaldo_future`,
+                user_id: 'egrinaldo19@gmail.com',
+                service_id: 'service_1',
+                barber_id: 'barber_1',
+                booking_date: '2025-08-14',
+                booking_time: '18:30',
+                status: 'pending',
+                notes: 'Agendamento de teste para 14/08/2025 - Egrinaldo',
+                created_at: new Date().toISOString(),
+                service_name: 'Corte + Barba',
+                service_price: 50.00,
+                barber_name: 'João Santos'
+            };
+            
+            saveAppointment(testAppointment, 'Agendamento para 14/08/2025 criado!');
+        }
+        
+        function saveAppointment(appointment, message) {
+            // Obter agendamentos existentes
+            const existingBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            
+            // Remover agendamentos de teste anteriores do Egrinaldo
+            const filteredBookings = existingBookings.filter(booking => 
+                !booking.id.includes('test_egrinaldo')
+            );
+            
+            // Adicionar o novo agendamento
+            filteredBookings.push(appointment);
+            
+            // Salvar de volta no localStorage
+            localStorage.setItem('userBookings', JSON.stringify(filteredBookings));
+            
+            document.getElementById('output').innerHTML = `<p style="color: green;">${message}</p>`;
+            
+            console.log('Agendamento criado:', appointment);
+            console.log('Total de agendamentos no localStorage:', filteredBookings.length);
+        }
+        
+        function clearAppointments() {
+            localStorage.removeItem('userBookings');
+            document.getElementById('output').innerHTML = '<p style="color: red;">Todos os agendamentos foram removidos!</p>';
+        }
+        
+        function checkAppointments() {
+            const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+            const egrinaldoBookings = userBookings.filter(booking => 
+                booking.user_id === 'egrinaldo19@gmail.com'
+            );
+            
+            let output = `<h2>Total de agendamentos: ${userBookings.length}</h2>`;
+            output += `<h2>Agendamentos do Egrinaldo: ${egrinaldoBookings.length}</h2>`;
+            
+            if (egrinaldoBookings.length > 0) {
+                output += '<h3>Detalhes dos agendamentos do Egrinaldo:</h3>';
+                egrinaldoBookings.forEach((booking, index) => {
+                    output += `
+                        <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                            <p><strong>ID:</strong> ${booking.id}</p>
+                            <p><strong>User ID:</strong> ${booking.user_id}</p>
+                            <p><strong>Data:</strong> ${booking.booking_date}</p>
+                            <p><strong>Hora:</strong> ${booking.booking_time}</p>
+                            <p><strong>Serviço:</strong> ${booking.service_name}</p>
+                            <p><strong>Barbeiro:</strong> ${booking.barber_name}</p>
+                            <p><strong>Status:</strong> ${booking.status}</p>
+                            <p><strong>Preço:</strong> R$ ${booking.service_price}</p>
+                            <p><strong>Notas:</strong> ${booking.notes}</p>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (userBookings.length > 0) {
+                output += '<h3>Todos os agendamentos:</h3>';
+                userBookings.forEach((booking, index) => {
+                    output += `
+                        <div style="border: 1px solid #ddd; margin: 5px; padding: 5px; font-size: 12px;">
+                            <p><strong>User ID:</strong> ${booking.user_id}</p>
+                            <p><strong>Data:</strong> ${booking.booking_date} ${booking.booking_time}</p>
+                            <p><strong>Status:</strong> ${booking.status}</p>
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('output').innerHTML = output;
+        }
+        
+        // Verificar automaticamente ao carregar
+        window.onload = checkAppointments;
+    </script>
+</body>
+</html>

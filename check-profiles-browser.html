@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Dados da Tabela Profiles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificar Dados da Tabela Profiles</h1>
+        
+        <div>
+            <button class="button" onclick="checkProfiles()">📋 Verificar Perfis</button>
+            <button class="button" onclick="checkBookings()">📅 Verificar Agendamentos</button>
+            <button class="button" onclick="checkUserMapping()">🔗 Verificar Mapeamento</button>
+            <button class="button" onclick="clearLogs()">🗑️ Limpar Logs</button>
+        </div>
+        
+        <div id="logs" class="log"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        const supabaseUrl = 'https://jheywkeofcttgdgquawm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpoZXl3a2VvZmN0dGdkZ3F1YXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxMjc2MjAsImV4cCI6MjA3MDcwMzYyMH0.6vOdNR1-h0ac_STZFp4ITuI8p5fjEVlnZkUT2hSxKX0';
+        
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('logs');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        window.clearLogs = function() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        window.checkProfiles = async function() {
+            log('🔍 Verificando dados na tabela profiles...', 'info');
+            
+            try {
+                const { data: profiles, error } = await supabase
+                    .from('profiles')
+                    .select('*');
+                
+                if (error) {
+                    log(`❌ Erro ao buscar perfis: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Perfis encontrados: ${profiles?.length || 0}`, 'success');
+                
+                if (profiles && profiles.length > 0) {
+                    log('\n📋 Lista de perfis:', 'info');
+                    profiles.forEach((profile, index) => {
+                        log(`\n${index + 1}. Perfil:`, 'info');
+                        log(`   ID: ${profile.id}`, 'info');
+                        log(`   Email: ${profile.email}`, 'info');
+                        log(`   Nome: ${profile.full_name || 'Não informado'}`, 'info');
+                        log(`   Telefone: ${profile.phone || 'Não informado'}`, 'info');
+                        log(`   Criado em: ${profile.created_at}`, 'info');
+                    });
+                } else {
+                    log('\n⚠️ Nenhum perfil encontrado na tabela profiles.', 'warning');
+                    log('\n💡 Isso explica por que os agendamentos mostram "Nome não configurado".', 'warning');
+                    log('\n🔧 Soluções possíveis:', 'info');
+                    log('   1. Criar perfis automaticamente quando usuários se registram', 'info');
+                    log('   2. Criar perfis manualmente para usuários existentes', 'info');
+                    log('   3. Modificar a lógica para buscar dados de auth.users diretamente', 'info');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro geral: ${error.message}`, 'error');
+            }
+        }
+        
+        window.checkBookings = async function() {
+            log('🔍 Verificando agendamentos no Supabase...', 'info');
+            
+            try {
+                const { data: bookings, error } = await supabase
+                    .from('bookings')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    log(`❌ Erro ao buscar agendamentos: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Agendamentos encontrados: ${bookings?.length || 0}`, 'success');
+                
+                if (bookings && bookings.length > 0) {
+                    log('\n📅 Lista de agendamentos:', 'info');
+                    bookings.forEach((booking, index) => {
+                        log(`\n${index + 1}. Agendamento:`, 'info');
+                        log(`   ID: ${booking.id}`, 'info');
+                        log(`   User ID: ${booking.user_id}`, 'info');
+                        log(`   Data: ${booking.booking_date}`, 'info');
+                        log(`   Hora: ${booking.booking_time}`, 'info');
+                        log(`   Status: ${booking.status}`, 'info');
+                        log(`   Criado em: ${booking.created_at}`, 'info');
+                    });
+                } else {
+                    log('\n⚠️ Nenhum agendamento encontrado no Supabase.', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro geral: ${error.message}`, 'error');
+            }
+        }
+        
+        window.checkUserMapping = async function() {
+            log('🔍 Verificando mapeamento entre agendamentos e perfis...', 'info');
+            
+            try {
+                // Buscar agendamentos
+                const { data: bookings, error: bookingsError } = await supabase
+                    .from('bookings')
+                    .select('user_id')
+                    .order('created_at', { ascending: false });
+                
+                if (bookingsError) {
+                    log(`❌ Erro ao buscar agendamentos: ${bookingsError.message}`, 'error');
+                    return;
+                }
+                
+                if (!bookings || bookings.length === 0) {
+                    log('⚠️ Nenhum agendamento encontrado para mapear.', 'warning');
+                    return;
+                }
+                
+                // Obter IDs únicos de usuários
+                const userIds = [...new Set(bookings.map(b => b.user_id))];
+                log(`📊 IDs únicos de usuários nos agendamentos: ${userIds.length}`, 'info');
+                
+                // Buscar perfis correspondentes
+                const { data: profiles, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .in('id', userIds);
+                
+                if (profilesError) {
+                    log(`❌ Erro ao buscar perfis: ${profilesError.message}`, 'error');
+                    return;
+                }
+                
+                log(`📋 Perfis encontrados para os usuários: ${profiles?.length || 0}`, 'info');
+                
+                // Verificar mapeamento
+                userIds.forEach(userId => {
+                    const profile = profiles?.find(p => p.id === userId);
+                    if (profile) {
+                        log(`✅ ${userId} -> ${profile.full_name || 'Sem nome'} (${profile.email})`, 'success');
+                    } else {
+                        log(`❌ ${userId} -> PERFIL NÃO ENCONTRADO`, 'error');
+                    }
+                });
+                
+                const unmappedCount = userIds.length - (profiles?.length || 0);
+                if (unmappedCount > 0) {
+                    log(`\n⚠️ ${unmappedCount} usuário(s) sem perfil na tabela profiles.`, 'warning');
+                    log('💡 Estes usuários aparecerão como "Nome não configurado".', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro geral: ${error.message}`, 'error');
+            }
+        }
+        
+        // Executar verificação inicial
+        log('🚀 Ferramenta de verificação carregada. Clique nos botões para verificar os dados.', 'info');
+    </script>
+</body>
+</html>

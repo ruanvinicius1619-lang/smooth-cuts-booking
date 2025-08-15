@@ -61,7 +61,7 @@ Responda de forma natural e personalizada:
 
 // Função para formatar o prompt com dados dinâmicos
 export const formatPrompt = (
-  services: { name: string; price: number; duration_minutes: number; description: string }[],
+  services: { name: string; price: number; duration: number; description: string }[],
   customerProfile: {
     name?: string;
     email?: string;
@@ -74,7 +74,7 @@ export const formatPrompt = (
   userMessage: string
 ) => {
   const servicesText = services
-    .map(s => `${s.name} - R$ ${s.price} (${s.duration_minutes} min): ${s.description}`)
+    .map(s => `${s.name} - R$ ${s.price} (${s.duration} min): ${s.description}`)
     .join('\n');
   
   const profileText = Object.entries(customerProfile)

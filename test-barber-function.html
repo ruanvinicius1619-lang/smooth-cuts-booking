@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste da Função isBarber</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        .log {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste da Função isBarber</h1>
+        <p>Esta página testa se a função isBarber está funcionando corretamente para o usuário barbeiro@smoothcuts.com</p>
+        
+        <div class="test-section">
+            <h3>🧪 Testes Disponíveis</h3>
+            <button onclick="testIsBarberFunction()">Testar Função isBarber</button>
+            <button onclick="testBarberConfig()">Verificar Configuração de Barbeiros</button>
+            <button onclick="testCurrentUser()">Verificar Usuário Atual</button>
+            <button onclick="simulateLogin()">Simular Login do Barbeiro</button>
+            <button onclick="clearLogs()">Limpar Logs</button>
+        </div>
+        
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        // Configuração dos barbeiros (copiada do arquivo original)
+        const BARBER_CONFIG = {
+            defaultCredentials: {
+                email: 'barbeiro@mateusbarber.com',
+                password: '123456'
+            },
+            authorizedBarbers: [
+                {
+                    id: 'default-barber',
+                    email: 'barbeiro@mateusbarber.com',
+                    name: 'Barbeiro Padrão',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'smoothcuts-barber',
+                    email: 'barbeiro@smoothcuts.com',
+                    name: 'Barbeiro SmoothCuts',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'joao-barber',
+                    email: 'joao@mateusbarber.com',
+                    name: 'João',
+                    permissions: ['view_appointments']
+                },
+                {
+                    id: 'pedro-barber',
+                    email: 'pedro@mateusbarber.com',
+                    name: 'Pedro',
+                    permissions: ['view_appointments']
+                }
+            ]
+        };
+
+        // Função isBarber (copiada do arquivo original)
+        const isBarber = (email) => {
+            if (!email) return false;
+            return BARBER_CONFIG.authorizedBarbers.some(barber => barber.email === email);
+        };
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        function testIsBarberFunction() {
+            log('=== TESTE: Função isBarber ===', 'info');
+            
+            const testEmails = [
+                'barbeiro@smoothcuts.com',
+                'barbeiro@mateusbarber.com',
+                'joao@mateusbarber.com',
+                'pedro@mateusbarber.com',
+                'usuario@normal.com',
+                '',
+                null,
+                undefined
+            ];
+            
+            testEmails.forEach(email => {
+                const result = isBarber(email);
+                const status = result ? 'success' : 'error';
+                log(`Email: "${email}" → isBarber: ${result}`, status);
+            });
+            
+            // Teste específico para barbeiro@smoothcuts.com
+            const targetEmail = 'barbeiro@smoothcuts.com';
+            const isTargetBarber = isBarber(targetEmail);
+            
+            if (isTargetBarber) {
+                log(`✅ SUCESSO: ${targetEmail} é reconhecido como barbeiro!`, 'success');
+            } else {
+                log(`❌ ERRO: ${targetEmail} NÃO é reconhecido como barbeiro!`, 'error');
+            }
+        }
+
+        function testBarberConfig() {
+            log('=== TESTE: Configuração de Barbeiros ===', 'info');
+            
+            log(`Total de barbeiros autorizados: ${BARBER_CONFIG.authorizedBarbers.length}`);
+            
+            BARBER_CONFIG.authorizedBarbers.forEach((barber, index) => {
+                log(`Barbeiro ${index + 1}: ${barber.email} (${barber.name})`);
+            });
+            
+            // Verificar se barbeiro@smoothcuts.com está na lista
+            const smoothcutsBarber = BARBER_CONFIG.authorizedBarbers.find(b => b.email === 'barbeiro@smoothcuts.com');
+            
+            if (smoothcutsBarber) {
+                log('✅ barbeiro@smoothcuts.com encontrado na configuração:', 'success');
+                log(`<pre>${JSON.stringify(smoothcutsBarber, null, 2)}</pre>`);
+            } else {
+                log('❌ barbeiro@smoothcuts.com NÃO encontrado na configuração!', 'error');
+            }
+        }
+
+        async function testCurrentUser() {
+            log('=== TESTE: Usuário Atual ===', 'info');
+            
+            try {
+                // Tentar acessar o Supabase se estiver disponível
+                if (typeof window !== 'undefined' && window.location.origin.includes('localhost')) {
+                    log('Tentando verificar usuário logado no Supabase...');
+                    
+                    // Simular verificação de sessão
+                    const sessionData = localStorage.getItem('supabase.auth.token');
+                    if (sessionData) {
+                        log('Dados de sessão encontrados no localStorage');
+                        try {
+                            const parsed = JSON.parse(sessionData);
+                            log(`<pre>${JSON.stringify(parsed, null, 2)}</pre>`);
+                        } catch (e) {
+                            log('Erro ao fazer parse dos dados de sessão', 'error');
+                        }
+                    } else {
+                        log('Nenhuma sessão encontrada no localStorage', 'warning');
+                    }
+                } else {
+                    log('Não é possível verificar usuário atual fora do contexto da aplicação', 'warning');
+                }
+            } catch (error) {
+                log(`Erro ao verificar usuário atual: ${error.message}`, 'error');
+            }
+        }
+
+        function simulateLogin() {
+            log('=== SIMULAÇÃO: Login do Barbeiro ===', 'info');
+            
+            const email = 'barbeiro@smoothcuts.com';
+            const password = '123456';
+            
+            log(`Simulando login com email: ${email}`);
+            log(`Senha: ${password}`);
+            
+            // Verificar se as credenciais estão corretas
+            const isValidEmail = isBarber(email);
+            
+            if (isValidEmail) {
+                log('✅ Email é de um barbeiro autorizado', 'success');
+                
+                // Simular criação de sessão
+                const mockUser = {
+                    email: email,
+                    id: 'mock-user-id',
+                    user_metadata: {
+                        full_name: 'Barbeiro SmoothCuts'
+                    }
+                };
+                
+                log('Simulando verificação da aba do barbeiro...');
+                const shouldShowBarberTab = isBarber(mockUser.email);
+                
+                if (shouldShowBarberTab) {
+                    log('✅ Aba "Painel do Barbeiro" DEVERIA aparecer!', 'success');
+                } else {
+                    log('❌ Aba "Painel do Barbeiro" NÃO apareceria!', 'error');
+                }
+                
+            } else {
+                log('❌ Email NÃO é de um barbeiro autorizado', 'error');
+            }
+        }
+
+        // Executar teste inicial
+        window.onload = function() {
+            log('🚀 Página carregada. Pronto para testes!', 'info');
+            testIsBarberFunction();
+        };
+    </script>
+</body>
+</html>

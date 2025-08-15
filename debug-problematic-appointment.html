@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug: Agendamento Problemático</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .appointment {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .problem {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+        .good {
+            background: #e8f5e8;
+            border-color: #4caf50;
+        }
+        .field {
+            margin: 5px 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #333;
+        }
+        .value {
+            color: #666;
+        }
+        .uuid {
+            font-family: monospace;
+            font-size: 12px;
+            color: #9c27b0;
+        }
+        .problem-indicator {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .good-indicator {
+            color: #4caf50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug: Agendamento Problemático</h1>
+        <p>Identificando qual agendamento está mostrando "Nome não configurado"</p>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function debugProblematicAppointment() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                // Buscar dados do localStorage
+                const userBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+                
+                resultsDiv.innerHTML = `
+                    <h2>📊 Agendamentos no localStorage: ${userBookings.length}</h2>
+                `;
+                
+                if (userBookings.length === 0) {
+                    resultsDiv.innerHTML += '<p>❌ Nenhum agendamento encontrado no localStorage</p>';
+                    return;
+                }
+                
+                // Analisar cada agendamento
+                userBookings.forEach((booking, index) => {
+                    const isProblematic = (
+                        !booking.user_name || 
+                        booking.user_name === 'Nome não configurado' ||
+                        !booking.user_phone ||
+                        booking.user_phone === 'Telefone não configurado'
+                    );
+                    
+                    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(booking.user_id);
+                    
+                    const appointmentDiv = document.createElement('div');
+                    appointmentDiv.className = `appointment ${isProblematic ? 'problem' : 'good'}`;
+                    
+                    appointmentDiv.innerHTML = `
+                        <h3>${isProblematic ? '🚨' : '✅'} Agendamento ${index + 1} ${isProblematic ? '(PROBLEMÁTICO)' : '(OK)'}</h3>
+                        
+                        <div class="field">
+                            <span class="label">ID do Agendamento:</span>
+                            <span class="value">${booking.id}</span>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">Data:</span>
+                            <span class="value">${booking.booking_date}</span>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">Hora:</span>
+                            <span class="value">${booking.booking_time}</span>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">Status:</span>
+                            <span class="value">${booking.status}</span>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">User ID:</span>
+                            <span class="value uuid">${booking.user_id}</span>
+                            ${isUUID ? '<span class="problem-indicator"> (UUID - pode ser o problema!)</span>' : '<span class="good-indicator"> (Email - OK)</span>'}
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">Nome do Usuário:</span>
+                            <span class="value">${booking.user_name || 'NÃO DEFINIDO'}</span>
+                            ${(!booking.user_name || booking.user_name === 'Nome não configurado') ? '<span class="problem-indicator"> ❌ PROBLEMA!</span>' : ''}
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">Email do Usuário:</span>
+                            <span class="value">${booking.user_email || 'NÃO DEFINIDO'}</span>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">Telefone do Usuário:</span>
+                            <span class="value">${booking.user_phone || 'NÃO DEFINIDO'}</span>
+                            ${(!booking.user_phone || booking.user_phone === 'Telefone não configurado') ? '<span class="problem-indicator"> ❌ PROBLEMA!</span>' : ''}
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">Serviço:</span>
+                            <span class="value">${booking.service_name}</span>
+                        </div>
+                        
+                        <div class="field">
+                            <span class="label">Barbeiro:</span>
+                            <span class="value">${booking.barber_name}</span>
+                        </div>
+                        
+                        ${isProblematic ? `
+                            <div style="margin-top: 15px; padding: 10px; background: #ffcdd2; border-radius: 4px;">
+                                <strong>🔧 Diagnóstico:</strong><br>
+                                ${isUUID ? '• User ID é um UUID, não um email<br>' : ''}
+                                ${(!booking.user_name || booking.user_name === 'Nome não configurado') ? '• Nome não configurado<br>' : ''}
+                                ${(!booking.user_phone || booking.user_phone === 'Telefone não configurado') ? '• Telefone não configurado<br>' : ''}
+                                <strong>💡 Solução:</strong> Criar perfil na tabela profiles com este UUID como ID
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    resultsDiv.appendChild(appointmentDiv);
+                });
+                
+                // Resumo
+                const problematicCount = userBookings.filter(booking => 
+                    !booking.user_name || 
+                    booking.user_name === 'Nome não configurado' ||
+                    !booking.user_phone ||
+                    booking.user_phone === 'Telefone não configurado'
+                ).length;
+                
+                const summaryDiv = document.createElement('div');
+                summaryDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px;';
+                summaryDiv.innerHTML = `
+                    <h3>📋 Resumo</h3>
+                    <p><strong>Total de agendamentos:</strong> ${userBookings.length}</p>
+                    <p><strong>Agendamentos problemáticos:</strong> ${problematicCount}</p>
+                    <p><strong>Agendamentos OK:</strong> ${userBookings.length - problematicCount}</p>
+                `;
+                
+                resultsDiv.appendChild(summaryDiv);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">❌ Erro: ${error.message}</p>`;
+            }
+        }
+        
+        // Executar quando a página carregar
+        window.addEventListener('load', debugProblematicAppointment);
+    </script>
+</body>
+</html>
