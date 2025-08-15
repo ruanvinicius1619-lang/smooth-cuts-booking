@@ -8,7 +8,7 @@ const Map = ({ className }: MapProps) => {
   // Coordenadas para São Paulo, SP - Centro (exemplo)
   const latitude = -23.5505;
   const longitude = -46.6333;
-  const address = "Rua das Flores, 123 - Centro, São Paulo, SP";
+  const address = "Rua São Gonçalo, nº 36 – Bairro Santos Dumont";
   
   // URL do Google Maps embed
   const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dOWTgHz-TK7VFC&q=${encodeURIComponent(address)}&zoom=15`;
@@ -37,7 +37,7 @@ const Map = ({ className }: MapProps) => {
             <MapPin className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
             <div className="text-sm">
               <div className="font-semibold text-gray-900">Smooth Cuts Barbearia</div>
-              <div className="text-gray-600">Rua das Flores, 123 - Centro</div>
+              <div className="text-gray-600">Rua São Gonçalo, nº 36 – Bairro Santos Dumont</div>
               <div className="text-gray-600">São Paulo, SP</div>
             </div>
           </div>

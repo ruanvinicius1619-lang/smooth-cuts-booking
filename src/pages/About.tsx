@@ -12,10 +12,6 @@ const About = () => {
     label: "Clientes Satisfeitos",
     value: "2500+"
   }, {
-    icon: Award,
-    label: "Prêmios Recebidos",
-    value: "12"
-  }, {
     icon: Clock,
     label: "Horas de Trabalho",
     value: "5000+"
@@ -95,7 +91,7 @@ const About = () => {
               <h2 className="text-3xl font-bold text-center text-foreground mb-12">
                 Nossos Números
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
                 {stats.map((stat, index) => <Card key={index} className="text-center">
                     <CardContent className="p-6">
                       <stat.icon className="w-12 h-12 text-accent mx-auto mb-4" />

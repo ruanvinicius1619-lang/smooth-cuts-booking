@@ -15,7 +15,7 @@ export const ADMIN_CONFIG = {
   barbershopSettings: {
     name: 'Mateus BarberShop',
     description: 'A melhor barbearia da cidade',
-    address: 'Rua das Flores, 123 - Centro',
+    address: 'Rua São Gonçalo, nº 36 – Bairro Santos Dumont',
     phone: '(11) 99999-9999',
     email: 'contato@mateusbarber.com',
     workingHours: {

@@ -367,7 +367,7 @@ const Contact = () => {
                       </div>
                       <div className="mt-4 text-center">
                         <p className="text-sm text-muted-foreground">
-                          📍 Rua das Flores, 123 - Centro, São Paulo, SP
+                          📍Rua São Gonçalo, nº 36 – Bairro Santos Dumont
                         </p>
                       </div>
                     </CardContent>
