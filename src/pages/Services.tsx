@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { Scissors, Award, Star, Clock, Sparkles, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import cortePigmentacao from "@/assets/corte+pigmentaçao.jpeg";
-import corteBarba from "@/assets/corte +  barba.png";
+import corteBarba from "@/assets/corte+barba.png";
 import corteSobrancelha from "@/assets/corte+sobrancelha.jpeg";
 import corteBarbasobrancelha from "@/assets/corte+barba+sobrancelha.jpeg";
 import corteTesoura from "@/assets/corte-na-tesoura.jpeg";
