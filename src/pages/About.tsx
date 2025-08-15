@@ -23,7 +23,7 @@ const About = () => {
   const team = [{
     name: "Mateus Pereira",
     role: "Barbeiro Master",
-    experience: "10 anos",
+    experience: "9 anos",
     specialty: "Cortes clássicos e modernos"
   }, {
     name: "João Santos",

@@ -217,7 +217,7 @@ const Services = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Profissionais Qualificados</h3>
               <p className="text-barbershop-gray">
-                Barbeiros experientes com mais de 10 anos de carreira e certificações profissionais
+                Barbeiros experientes com mais de 9 anos de carreira e certificações profissionais
               </p>
             </div>
 
