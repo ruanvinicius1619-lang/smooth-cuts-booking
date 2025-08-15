@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { Calendar, Star, Scissors, Clock, Award, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/barbershop-hero.jpg";
-import cortePigmentacao from "@/assets/corte+pigmentaçao.jpeg";
+import cortePigmentacao from "@/assets/corte+pigmentacao.jpeg";
 import corteBarba from "@/assets/corte+barba.png";
 import selagemCorte from "@/assets/selagem+corte.jpeg";
 import hairStyling from "@/assets/hair-styling.jpg";
