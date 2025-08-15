@@ -178,7 +178,7 @@ O sistema sempre mantém dados padrão como fallback:
 - Tratamento Premium (R$ 85, 90min)
 
 **Barbeiros Padrão:**
-- Carlos Silva (Cortes clássicos)
+- Mateus Pereira (Cortes clássicos)
 - João Santos (Barba e bigode)
 - Pedro Costa (Cortes modernos)
 

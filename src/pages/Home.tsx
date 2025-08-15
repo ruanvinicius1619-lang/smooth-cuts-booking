@@ -44,7 +44,7 @@ const Home = () => {
   const stats = [
     { icon: Users, label: "Clientes Satisfeitos", value: "1.500+" },
     { icon: Star, label: "Avaliação Média", value: "4.9/5" },
-    { icon: Award, label: "Anos de Experiência", value: "9" },
+    { icon: Award, label: "Anos de Experiência", value: "9+" },
     { icon: Clock, label: "Horários Disponíveis", value: "10h/dia" }
   ];
 
@@ -115,7 +115,7 @@ const Home = () => {
               Nossos <span className="text-accent">Serviços</span>
             </h2>
             <p className="text-xl text-barbershop-gray max-w-2xl mx-auto">
-              Oferecemos os melhores serviços de barbearia com profissionais qualificados e produtos premium
+              Oferecemos os melhores serviços de barbearia com profissionais qualificados
             </p>
           </div>
 

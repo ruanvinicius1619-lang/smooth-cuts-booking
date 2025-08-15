@@ -54,7 +54,7 @@ const runMigrationsAutomatically = async (): Promise<boolean> => {
     ];
     
     const defaultBarbers = [
-      { name: 'Carlos Silva', specialty: 'Cortes clássicos' },
+      { name: 'Mateus Pereira', specialty: 'Cortes clássicos' },
       { name: 'João Santos', specialty: 'Barba e bigode' },
       { name: 'Pedro Costa', specialty: 'Cortes modernos' }
     ];

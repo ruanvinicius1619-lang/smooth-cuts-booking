@@ -6,11 +6,11 @@ const About = () => {
   const stats = [{
     icon: Star,
     label: "Anos de Experiência",
-    value: "15+"
+    value: "9+"
   }, {
     icon: Users,
     label: "Clientes Satisfeitos",
-    value: "5000+"
+    value: "2500+"
   }, {
     icon: Award,
     label: "Prêmios Recebidos",
@@ -18,10 +18,10 @@ const About = () => {
   }, {
     icon: Clock,
     label: "Horas de Trabalho",
-    value: "10000+"
+    value: "5000+"
   }];
   const team = [{
-    name: "Carlos Silva",
+    name: "Mateus Pereira",
     role: "Barbeiro Master",
     experience: "10 anos",
     specialty: "Cortes clássicos e modernos"
@@ -48,7 +48,7 @@ const About = () => {
                 Nossa História
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Mais de 15 anos oferecendo o melhor em cortes e cuidados masculinos
+                Mais de 9 anos oferecendo o melhor em cortes e cuidados masculinos
               </p>
             </div>
           </div>
@@ -62,7 +62,7 @@ const About = () => {
                 <div>
                   <h2 className="text-3xl font-bold text-foreground mb-6">Mateus Barbershop</h2>
                   <p className="text-muted-foreground mb-6">
-                    Fundada em 2009, a Mateus Barbershop nasceu da paixão por oferecer 
+                    Fundada em 2015, a Mateus Barbershop nasceu da paixão por oferecer 
                     um serviço de excelência no cuidado masculino. Nossa missão é 
                     proporcionar uma experiência única, combinando técnicas tradicionais 
                     com as mais modernas tendências.

@@ -144,7 +144,7 @@ const Services = () => {
             Nossos <span className="text-accent">Serviços</span>
           </h1>
           <p className="text-xl text-barbershop-gray-light max-w-3xl mx-auto">
-            Oferecemos uma gama completa de serviços premium para o cuidado masculino, 
+            Oferecemos uma gama completa de serviços  para o cuidado masculino, 
             combinando tradição e modernidade para resultados excepcionais
           </p>
         </div>
@@ -237,7 +237,7 @@ const Services = () => {
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-3">Ambiente Premium</h3>
               <p className="text-barbershop-gray">
-                Espaço moderno e confortável com atendimento personalizado e exclusivo
+                Espaço confortável com atendimento personalizado e exclusivo
               </p>
             </div>
           </div>

@@ -90,7 +90,7 @@ ON CONFLICT DO NOTHING;
 
 -- Insert default barbers
 INSERT INTO public.barbers (name, specialty) VALUES
-  ('Carlos Silva', 'Cortes clássicos'),
+  ('Mateus Pereira', 'Cortes clássicos'),
   ('João Santos', 'Barba e bigode'),
   ('Pedro Costa', 'Cortes modernos')
 ON CONFLICT DO NOTHING;
