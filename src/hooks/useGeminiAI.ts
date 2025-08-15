@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { GEMINI_CONFIG, BARBER_ASSISTANT_PROMPT } from '../config/gemini';
+import { HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 
 interface GeminiResponse {
   text: string;
@@ -44,7 +45,24 @@ export const useGeminiAI = () => {
           const model = genAI.getGenerativeModel({ 
             model: GEMINI_CONFIG.MODEL,
             generationConfig: GEMINI_CONFIG.GENERATION_CONFIG,
-            safetySettings: GEMINI_CONFIG.SAFETY_SETTINGS
+            safetySettings: [
+              {
+                category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+              },
+              {
+                category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+              },
+              {
+                category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+              },
+              {
+                category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+              },
+            ]
           });
           
           const prompt = formatPromptWithContext(message, context);
@@ -100,6 +118,34 @@ export const useGeminiAI = () => {
     generateRecommendations,
     isLoading
   };
+};
+
+// Helper function to format prompt with context
+const formatPromptWithContext = (
+  message: string,
+  context: {
+    customerProfile?: CustomerProfile;
+    services?: Service[];
+    conversationHistory?: string[];
+  }
+): string => {
+  const servicesText = context.services 
+    ? context.services.map(s => `${s.name} - R$ ${s.price} (${s.duration} min): ${s.description}`).join('\n')
+    : 'Serviços não disponíveis no momento';
+  
+  const profileText = context.customerProfile 
+    ? Object.entries(context.customerProfile).map(([key, value]) => `${key}: ${value}`).join(', ')
+    : 'Perfil não informado';
+  
+  const historyText = context.conversationHistory 
+    ? context.conversationHistory.slice(-5).join('\n')
+    : 'Primeira interação';
+  
+  return BARBER_ASSISTANT_PROMPT
+    .replace('{services}', servicesText)
+    .replace('{customerProfile}', profileText)
+    .replace('{conversationHistory}', historyText) +
+    `\n\nMensagem do cliente: "${message}"\n\nSua resposta:`;
 };
 
 // Helper function to generate intelligent responses
