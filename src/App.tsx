@@ -7,6 +7,7 @@ import DatabaseInitializer from "@/components/DatabaseInitializer";
 import IdleLogoutProvider from "@/components/IdleLogoutProvider";
 import DiagnosticFloatingButton from "@/components/DiagnosticFloatingButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import ChatBot from "@/components/ChatBot";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
 import Auth from "./pages/Auth";
@@ -41,6 +42,7 @@ const App = () => (
             </Routes>
             <DiagnosticFloatingButton />
             <WhatsAppButton phoneNumber="5571993163034" />
+            <ChatBot />
           </IdleLogoutProvider>
         </BrowserRouter>
       </DatabaseInitializer>
